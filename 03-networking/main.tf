@@ -8,7 +8,7 @@ terraform {
   }
   backend "gcs" {
     bucket = "gch-tf-state-28bdf9"
-    prefix = "02-networking"
+    prefix = "03-networking"
   }
 }
 
@@ -18,7 +18,7 @@ data "terraform_remote_state" "resman" {
   backend = "gcs"
   config = {
     bucket = var.state_bucket
-    prefix = "01-resman"
+    prefix = "02-resman"
   }
 }
 

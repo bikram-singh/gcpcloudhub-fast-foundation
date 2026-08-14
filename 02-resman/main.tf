@@ -8,7 +8,7 @@ terraform {
   }
   backend "gcs" {
     bucket = "gch-tf-state-28bdf9"
-    prefix = "01-resman"
+    prefix = "02-resman"
   }
 }
 
