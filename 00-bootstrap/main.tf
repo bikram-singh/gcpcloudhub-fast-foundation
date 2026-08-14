@@ -20,6 +20,7 @@ resource "google_project" "seed" {
   name            = "${var.prefix}-seed"
   project_id      = "${var.prefix}-seed-${random_id.suffix.hex}"
   org_id          = var.org_id
+  auto_create_network = false
   billing_account = var.billing_account_id
 }
 
@@ -46,6 +47,7 @@ resource "google_storage_bucket" "tf_state" {
   }
 
   uniform_bucket_level_access = true
+  public_access_prevention     = "enforced"
 
   depends_on = [google_project_service.seed_apis]
 }

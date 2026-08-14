@@ -33,6 +33,7 @@ resource "google_project" "net_host" {
   org_id          = null
   folder_id       = data.terraform_remote_state.resman.outputs.prod_folder_ids["IT"]
   billing_account = var.billing_account_id
+  auto_create_network = false
 }
 
 resource "google_project_service" "net_apis" {
@@ -52,19 +53,33 @@ resource "google_compute_network" "shared_vpc" {
 }
 
 resource "google_compute_subnetwork" "prod" {
-  name          = "${var.prefix}-prod-subnet"
-  project       = google_project.net_host.project_id
-  network       = google_compute_network.shared_vpc.id
-  region        = var.region
-  ip_cidr_range = "10.10.0.0/20"
+  name                     = "${var.prefix}-prod-subnet"
+  project                  = google_project.net_host.project_id
+  network                  = google_compute_network.shared_vpc.id
+  region                   = var.region
+  ip_cidr_range            = "10.10.0.0/20"
+  private_ip_google_access = true
+
+  log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
 }
 
 resource "google_compute_subnetwork" "nonprod" {
-  name          = "${var.prefix}-nonprod-subnet"
-  project       = google_project.net_host.project_id
-  network       = google_compute_network.shared_vpc.id
-  region        = var.region
-  ip_cidr_range = "10.20.0.0/20"
+  name                     = "${var.prefix}-nonprod-subnet"
+  project                  = google_project.net_host.project_id
+  network                  = google_compute_network.shared_vpc.id
+  region                   = var.region
+  ip_cidr_range            = "10.20.0.0/20"
+  private_ip_google_access = true
+
+  log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
 }
 
 resource "google_compute_router" "router" {
