@@ -106,3 +106,10 @@ resource "google_service_account_iam_member" "wif_impersonation" {
   role                = "roles/iam.workloadIdentityUser"
   member              = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repo}"
 }
+
+terraform {
+  backend "gcs" {
+    bucket = "gch-tf-state-28bdf9"
+    prefix = "00-bootstrap"
+  }
+}
