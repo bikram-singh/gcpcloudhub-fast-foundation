@@ -31,6 +31,7 @@ resource "google_project_service" "seed_apis" {
     "iamcredentials.googleapis.com",
     "storage.googleapis.com",
     "serviceusage.googleapis.com",
+    "orgpolicy.googleapis.com",
   ])
   project = google_project.seed.project_id
   service = each.value
