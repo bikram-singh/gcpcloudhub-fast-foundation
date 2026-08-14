@@ -54,3 +54,9 @@ cd ../03-networking && terraform init && terraform apply
 - 04-project-factory: workload projects per department, attached to shared VPC
 - 05-security: centralized audit logging, bucket access logging
 - CI/CD via GitHub Actions using the WIF setup from Stage 0
+
+## Lessons learned
+
+- Free-tier Cloud Billing accounts can only be linked to a limited number of projects simultaneously (observed limit: 5). The project factory uses an explicit `enabled_workloads` list rather than a full department x environment cross-product, so it stays within quota while keeping the underlying pattern factory-shaped and easy to extend.
+- Shared VPC requires the host project to be explicitly designated via `google_compute_shared_vpc_host_project`, separate from creating the VPC and subnets themselves.
+- API-quota-project routing (`user_project_override`) means every API a stage calls, including permission pre-checks like Cloud Billing's, must be enabled on the quota project itself.
