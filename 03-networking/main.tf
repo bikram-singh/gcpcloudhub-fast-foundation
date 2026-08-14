@@ -128,3 +128,8 @@ resource "google_compute_firewall" "allow_iap_ssh" {
 
   source_ranges = ["35.235.240.0/20"]  # Google's IAP range
 }
+
+# Designate this project as a Shared VPC host project so other projects can attach as service projects
+resource "google_compute_shared_vpc_host_project" "host" {
+  project = google_project.net_host.project_id
+}
