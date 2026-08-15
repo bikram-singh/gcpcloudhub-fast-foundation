@@ -12,3 +12,4 @@ variable "state_bucket" {
   description = "GCS bucket used for all stage state files."
   type        = string
 }
+

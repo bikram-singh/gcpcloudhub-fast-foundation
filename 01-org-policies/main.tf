@@ -14,7 +14,7 @@ terraform {
 
 provider "google" {
   user_project_override = true
-  billing_project        = "gch-seed-28bdf9"
+  billing_project       = "gch-seed-28bdf9"
 }
 
 # Prevent default VPC network creation on all new projects org-wide
