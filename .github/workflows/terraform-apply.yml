@@ -201,7 +201,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -227,7 +227,7 @@ jobs:
     needs: apply-workload-demo
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
@@ -253,7 +253,7 @@ jobs:
     needs: apply-workload-demo
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install and run Checkov
         run: |
           pip install checkov --break-system-packages --quiet
