@@ -254,21 +254,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Checkov
-        id: checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: .
-          framework: terraform
-          skip_check: CKV_GCP_62,CKV_GCP_125,CKV_GCP_45,CKV_GCP_38,CKV_GCP_81
-          soft_fail: true
-          output_format: cli,json
-          output_file_path: console,/tmp/checkov.json
+      - name: Install and run Checkov
+        run: |
+          pip install checkov --break-system-packages --quiet
+          mkdir -p /tmp/checkov-out
+          checkov -d . --compact --quiet \
+            --skip-check CKV_GCP_62,CKV_GCP_125,CKV_GCP_45,CKV_GCP_38,CKV_GCP_81 \
+            --output json --output-file-path /tmp/checkov-out || true
+          ls -la /tmp/checkov-out/
       - name: Extract pass count
         id: count
         run: |
-          ls -la /tmp/checkov.json || echo "file missing"
-          PASSED=$(python3 -c "import json; d=json.load(open('/tmp/checkov.json')); print(len(d.get('results',{}).get('passed_checks',[])))" 2>/dev/null || echo "?")
+          find /tmp/checkov-out -type f
+          PASSED=$(python3 -c "import json,glob; files=glob.glob('/tmp/checkov-out/**/*.json', recursive=True); d=json.load(open(files[0])) if files else {}; print(len(d.get('results',{}).get('passed_checks',[])) or '?')" 2>/dev/null || echo "?")
           echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
       - name: Update checkov badge gist
         uses: schneegans/dynamic-badges-action@v1.7.0
