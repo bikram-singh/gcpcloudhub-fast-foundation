@@ -10,3 +10,11 @@ repos:
           - "--compact"
           - "--skip-check"
           - "CKV_GCP_62,CKV_GCP_125,CKV_GCP_45,CKV_GCP_38,CKV_GCP_81"
+      - id: terraform_docs
+        args:
+          - "markdown"
+          - "table"
+          - "--output-file"
+          - "README.md"
+          - "--output-mode"
+          - "inject"
