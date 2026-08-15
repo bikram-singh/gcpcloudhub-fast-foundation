@@ -240,7 +240,7 @@ jobs:
           COST=$(cat /tmp/infracost.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(f\"{float(d.get('totalMonthlyCost','0')):.2f}\")" 2>/dev/null || echo "0.00")
           echo "amount=$COST" >> "$GITHUB_OUTPUT"
       - name: Update cost badge gist
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 5e15a2c50f65a4436ed0b99c1e673ae7
@@ -268,7 +268,7 @@ jobs:
           PASSED=$(python3 -c "import json; d=json.load(open('/tmp/checkov-out/results_json.json')); print(next((i['summary']['passed'] for i in d if i.get('check_type')=='terraform'), '?'))" 2>/dev/null || echo "?")
           echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
       - name: Update checkov badge gist
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 5e15a2c50f65a4436ed0b99c1e673ae7
