@@ -267,7 +267,31 @@ jobs:
       - name: Extract pass count
         id: count
         run: |
-          PASSED=$(cat /tmp/checkov.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('summary',{}).get('passed','?'))" 2>/dev/null || echo "?")
+          echo "--- checkov.json preview ---"
+          head -c 800 /tmp/checkov.json || true
+          echo ""
+          echo "--- end preview ---"
+          PASSED=$(python3 << 'PYEOF'
+import json
+try:
+    with open('/tmp/checkov.json') as f:
+        d = json.load(f)
+    if isinstance(d, list):
+        total = sum(item.get('summary', {}).get('passed', 0) for item in d)
+        print(total)
+    elif isinstance(d, dict):
+        if 'summary' in d:
+            print(d['summary'].get('passed', '?'))
+        elif 'results' in d and isinstance(d['results'], dict):
+            print(len(d['results'].get('passed_checks', [])))
+        else:
+            print('?')
+    else:
+        print('?')
+except Exception as e:
+    print('?')
+PYEOF
+)
           echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
       - name: Update checkov badge gist
         uses: schneegans/dynamic-badges-action@v1.7.0
