@@ -248,3 +248,33 @@ jobs:
           label: monthly cost
           message: $${{ steps.cost.outputs.amount }}
           color: green
+
+  update-checkov-badge:
+    needs: apply-workload-demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Checkov
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          skip_check: CKV_GCP_62,CKV_GCP_125,CKV_GCP_45,CKV_GCP_38,CKV_GCP_81
+          soft_fail: true
+          output_format: json
+          output_file_path: console,/tmp/checkov.json
+      - name: Extract pass count
+        id: count
+        run: |
+          PASSED=$(cat /tmp/checkov.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('summary',{}).get('passed','?'))" 2>/dev/null || echo "?")
+          echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
+      - name: Update checkov badge gist
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 5e15a2c50f65a4436ed0b99c1e673ae7
+          filename: gcpcloudhub-checkov-badge.json
+          label: checkov
+          message: ${{ steps.count.outputs.passed }} passed
+          color: green

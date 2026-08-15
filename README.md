@@ -4,7 +4,7 @@
 
 ![monthly cost](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-cost-badge.json&style=for-the-badge)
 ![license](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
-![checkov](https://img.shields.io/badge/checkov-67%20passed-brightgreen?style=for-the-badge)
+![checkov](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-checkov-badge.json&style=for-the-badge)
 
 </div>
 

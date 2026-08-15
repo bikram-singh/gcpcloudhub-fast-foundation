@@ -144,3 +144,33 @@ jobs:
         with:
           path: /tmp/infracost.json
           behavior: update
+
+  checkov-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Checkov
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          skip_check: CKV_GCP_62,CKV_GCP_125,CKV_GCP_45,CKV_GCP_38,CKV_GCP_81
+          soft_fail: true
+          output_format: cli
+          output_file_path: console,/tmp/checkov-output.txt
+      - name: Post Checkov comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let output = "Checkov scan completed.";
+            try {
+              output = fs.readFileSync('/tmp/checkov-output.txt', 'utf8').slice(-3000);
+            } catch (e) {}
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Checkov scan results\n\`\`\`\n${output}\n\`\`\``
+            });
