@@ -65,3 +65,31 @@ resource "google_organization_iam_custom_role" "devops_scoped" {
     "run.services.update",
   ]
 }
+
+# Secret Manager pattern - demonstrates secure secret storage for future workloads.
+# No secret VALUE is stored in Terraform state or code; only the secret container
+# is created here. Actual values are set out-of-band via gcloud/Console/CI secrets,
+# never committed or passed through tfvars.
+
+resource "google_secret_manager_secret" "example_workload_secret" {
+  project   = var.seed_project_id
+  secret_id = "${var.prefix}-example-db-credential"
+
+  replication {
+    auto {}
+  }
+
+  labels = {
+    department  = "platform"
+    managed-by  = "terraform"
+  }
+}
+
+# Grant only the automation SA and devops group access to read this secret -
+# least privilege, not org-wide or project-wide broad access.
+resource "google_secret_manager_secret_iam_member" "devops_secret_accessor" {
+  project   = var.seed_project_id
+  secret_id = google_secret_manager_secret.example_workload_secret.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "group:gcp-devops@gcpcloudhub.in"
+}

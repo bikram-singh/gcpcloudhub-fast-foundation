@@ -44,6 +44,7 @@ resource "google_project_service" "seed_apis" {
     "cloudbilling.googleapis.com",
     "billingbudgets.googleapis.com",
     "logging.googleapis.com",
+    "secretmanager.googleapis.com",
   ])
   project = google_project.seed.project_id
   service = each.value

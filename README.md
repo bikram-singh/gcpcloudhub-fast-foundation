@@ -81,3 +81,7 @@ Scanned with Terrascan v1.19.9: 191 policies evaluated, 0 violations (High/Mediu
 ### Lessons learned from wiring up CI
 
 The automation service account had org-level admin roles (from Stage 0) but had never been granted ownership on the individual projects it needed to manage, since all prior applies ran under a human user's credentials in Cloud Shell. Moving to CI surfaced these gaps immediately: the SA needed explicit Owner on each project (seed, networking host, workload projects) and explicit org-level `logging.admin` and `iam.organizationRoleAdmin` roles to match what the human operator had accumulated ad hoc. This is a good illustration of why CI/CD matters even for a solo project — it forces the automation identity's actual permissions to be complete and explicit, rather than silently depending on a human's broader access.
+
+## Secret Manager pattern
+
+A Secret Manager container (`gch-example-db-credential`) demonstrates the intended pattern for workload credentials: the secret container is Terraform-managed, but no secret value is ever stored in Terraform state, `.tfvars`, or committed code. Values are set out-of-band (via `gcloud secrets versions add` or the Console) by whoever operates the workload that needs it. Access is scoped to the `gcp-devops` group via `secretAccessor`, not project-wide or org-wide.
