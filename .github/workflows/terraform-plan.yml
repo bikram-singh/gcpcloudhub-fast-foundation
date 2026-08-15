@@ -126,6 +126,10 @@ jobs:
         working-directory: ${{ matrix.stage }}
         run: terraform plan -no-color
 
+      - name: Terraform Test
+        working-directory: ${{ matrix.stage }}
+        run: test -d tests && terraform test -no-color || echo "No tests for this stage"
+
   infracost:
     runs-on: ubuntu-latest
     needs: plan
