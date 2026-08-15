@@ -222,3 +222,29 @@ jobs:
           TFEOF
       - working-directory: 06-workload-demo
         run: terraform init && terraform apply -auto-approve
+
+  update-cost-badge:
+    needs: apply-workload-demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+      - name: Generate cost estimate
+        run: |
+          infracost breakdown --path=. --format=json --out-file=/tmp/infracost.json || true
+      - name: Extract monthly cost
+        id: cost
+        run: |
+          COST=$(cat /tmp/infracost.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('totalMonthlyCost','0'))" 2>/dev/null || echo "0")
+          echo "amount=$COST" >> "$GITHUB_OUTPUT"
+      - name: Update cost badge gist
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: <paste-your-gist-id>
+          filename: gcpcloudhub-cost-badge.json
+          label: monthly cost
+          message: $${{ steps.cost.outputs.amount }}
+          color: green
