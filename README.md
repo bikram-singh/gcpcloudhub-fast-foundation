@@ -5,13 +5,20 @@ GCP organization bootstrap and landing zone, inspired by Google Cloud's Fabric F
 
 This project is scanned with [Checkov](https://www.checkov.io/) for IaC misconfigurations.
 
-**Current state**: 46 passed, 15 accepted findings.
+**Current state**: 67 passed, 3 accepted findings (down from 22 initial findings).
 
-**Fixed**: default networks removed, open SSH/RDP firewall rules deleted, VPC Flow Logs enabled, Private Google Access enabled, bucket public access prevention enforced.
+**Fixed over the project's lifecycle**:
+- Default networks removed, open SSH/RDP firewall rules deleted
+- VPC Flow Logs and Private Google Access enabled on all subnets
+- Bucket public access prevention enforced
+- `roles/editor` on devops folder IAM replaced with a least-privilege custom role (`gchDevopsScoped`) covering only compute, GKE, and Cloud Run permissions actually needed
+- Full audit logging (Admin Read, Data Read, Data Write) enabled explicitly on every project
+- Centralized org-wide audit log sink with a dedicated logging bucket (05-security)
 
-**Accepted trade-offs** (documented, not fixed): broad `roles/editor` and `roles/iam.securityAdmin` bindings are intentional for a demo landing zone; production would use least-privilege custom roles.
-
-**Deferred to a future `04-security` stage**: centralized audit logging and bucket access logging.
+**Accepted, documented exceptions** (3 remaining findings):
+- `roles/iam.securityAdmin` at org level for the security admins group — intentional; security teams need org-wide visibility, unlike devops which had no justification for broad Editor access
+- State bucket access logging — would require a second logging bucket to log access to the first; skipped as disproportionate for this project's scale
+- GitHub OIDC trust condition could add a `repository_owner` check alongside the existing repository-scoped condition — minor hardening, not a functional gap since the repo-level restriction already prevents unauthorized impersonation
 
 ## Architecture
 
