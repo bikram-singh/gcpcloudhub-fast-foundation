@@ -22,6 +22,9 @@ This project is scanned with [Checkov](https://www.checkov.io/) for IaC misconfi
 
 ## Architecture
 
+![Landing zone architecture](docs/architecture.svg)
+
+
 A hand-built GCP Organization landing zone, inspired by Google's Fabric FAST framework, using department + environment folder segmentation instead of a flat environment-only hierarchy.
 
 ## Architecture
