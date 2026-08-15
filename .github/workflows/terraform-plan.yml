@@ -22,6 +22,7 @@ jobs:
           - 03-networking
           - 04-project-factory
           - 05-security
+          - 06-workload-demo
     steps:
       - uses: actions/checkout@v7
 
@@ -106,6 +107,13 @@ jobs:
           prefix           = "$PREFIX"
           seed_project_id  = "$SEED_PROJECT_ID"
           state_bucket     = "$STATE_BUCKET"
+          EOF
+              ;;
+            06-workload-demo)
+              cat > terraform.tfvars << EOF
+          prefix       = "$PREFIX"
+          region       = "$REGION"
+          state_bucket = "$STATE_BUCKET"
           EOF
               ;;
           esac
