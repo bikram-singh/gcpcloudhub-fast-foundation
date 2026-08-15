@@ -63,7 +63,26 @@ resource "google_storage_bucket" "tf_state" {
   }
 
   uniform_bucket_level_access = true
-  public_access_prevention    = "enforced"
+
+  lifecycle_rule {
+    condition {
+      num_newer_versions = 10
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  lifecycle_rule {
+    condition {
+      age        = 30
+      with_state = "ARCHIVED"
+    }
+    action {
+      type = "Delete"
+    }
+  }
+  public_access_prevention = "enforced"
 
   depends_on = [google_project_service.seed_apis]
 }

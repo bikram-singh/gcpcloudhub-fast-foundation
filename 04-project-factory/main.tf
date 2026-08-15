@@ -14,7 +14,7 @@ terraform {
 
 provider "google" {
   user_project_override = true
-  billing_project        = "gch-seed-28bdf9"
+  billing_project       = "gch-seed-28bdf9"
 }
 
 data "terraform_remote_state" "resman" {
@@ -64,6 +64,8 @@ resource "google_project" "workload" {
     department  = lower(each.value.department)
     environment = each.value.env
     cost-center = "${lower(each.value.department)}-${each.value.env}"
+    service     = "${lower(each.value.department)}-workload"
+    stage       = each.value.env == "prod" ? "prod" : "dev"
     managed-by  = "terraform"
   }
 }
