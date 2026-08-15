@@ -207,7 +207,7 @@ jobs:
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - name: Write terraform.tfvars
         working-directory: 06-workload-demo
         env:
