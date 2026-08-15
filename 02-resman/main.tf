@@ -57,6 +57,6 @@ resource "google_organization_iam_member" "security_admins" {
 resource "google_folder_iam_member" "devops_nonprod" {
   for_each = toset(var.departments)
   folder   = google_folder.nonprod[each.value].name
-  role     = "roles/editor"
+  role     = "organizations/321953905269/roles/gchDevopsScoped"
   member   = "group:${var.groups.devops}"
 }
