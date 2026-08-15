@@ -1,6 +1,8 @@
 # gcpcloudhub-fast-foundation
 
 ![monthly cost](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/<paste-your-gist-id>/raw/gcpcloudhub-cost-badge.json)
+
+![monthly cost](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/<paste-your-gist-id>/raw/gcpcloudhub-cost-badge.json)
 GCP organization bootstrap and landing zone, inspired by Google Cloud's Fabric FAST design, written from scratch in Terraform
 
 ## Security Scanning
