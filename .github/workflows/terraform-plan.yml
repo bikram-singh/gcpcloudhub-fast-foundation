@@ -33,6 +33,83 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
 
+      - name: Write terraform.tfvars
+        working-directory: ${{ matrix.stage }}
+        env:
+          ORG_ID: ${{ vars.GCP_ORG_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          PREFIX: ${{ vars.GCP_PREFIX }}
+          CUSTOMER_ID: ${{ vars.GCP_CUSTOMER_ID }}
+          DOMAIN: ${{ vars.GCP_DOMAIN }}
+          STATE_BUCKET: ${{ vars.GCP_STATE_BUCKET }}
+          SEED_PROJECT_ID: ${{ vars.GCP_SEED_PROJECT_ID }}
+          GH_REPO_REF: ${{ vars.GH_REPO_REF }}
+          BILLING_ACCOUNT_ID: ${{ secrets.GCP_BILLING_ACCOUNT_ID }}
+        run: |
+          case "${{ matrix.stage }}" in
+            00-bootstrap)
+              cat > terraform.tfvars << EOF
+          org_id             = "$ORG_ID"
+          billing_account_id = "$BILLING_ACCOUNT_ID"
+          domain             = "$DOMAIN"
+          prefix             = "$PREFIX"
+          region             = "$REGION"
+          github_repo        = "$GH_REPO_REF"
+          EOF
+              ;;
+            01-org-policies)
+              cat > terraform.tfvars << EOF
+          org_id       = "$ORG_ID"
+          customer_id  = "$CUSTOMER_ID"
+          state_bucket = "$STATE_BUCKET"
+          EOF
+              ;;
+            02-resman)
+              cat > terraform.tfvars << EOF
+          org_id      = "$ORG_ID"
+          prefix      = "$PREFIX"
+          departments = ["HR", "Finance", "IT", "Sales", "AI"]
+          groups = {
+            org_admins      = "gcp-organization-admins@$DOMAIN"
+            billing_admins  = "gcp-billing-admins@$DOMAIN"
+            devops          = "gcp-devops@$DOMAIN"
+            security_admins = "gcp-security-admins@$DOMAIN"
+          }
+          EOF
+              ;;
+            03-networking)
+              cat > terraform.tfvars << EOF
+          org_id             = "$ORG_ID"
+          billing_account_id = "$BILLING_ACCOUNT_ID"
+          prefix             = "$PREFIX"
+          region             = "$REGION"
+          state_bucket       = "$STATE_BUCKET"
+          EOF
+              ;;
+            04-project-factory)
+              cat > terraform.tfvars << EOF
+          org_id             = "$ORG_ID"
+          billing_account_id = "$BILLING_ACCOUNT_ID"
+          prefix             = "$PREFIX"
+          departments        = ["HR", "Finance", "IT", "Sales", "AI"]
+          state_bucket       = "$STATE_BUCKET"
+          enabled_workloads = [
+            { department = "HR",    env = "prod" },
+            { department = "HR",    env = "nonprod" },
+            { department = "Sales", env = "nonprod" },
+          ]
+          EOF
+              ;;
+            05-security)
+              cat > terraform.tfvars << EOF
+          org_id           = "$ORG_ID"
+          prefix           = "$PREFIX"
+          seed_project_id  = "$SEED_PROJECT_ID"
+          state_bucket     = "$STATE_BUCKET"
+          EOF
+              ;;
+          esac
+
       - name: Terraform Init
         working-directory: ${{ matrix.stage }}
         run: terraform init
