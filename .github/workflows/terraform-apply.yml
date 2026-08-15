@@ -19,7 +19,7 @@ jobs:
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - name: Write terraform.tfvars
         working-directory: 00-bootstrap
         env:
@@ -52,7 +52,7 @@ jobs:
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - name: Write terraform.tfvars
         working-directory: 01-org-policies
         env:
@@ -79,7 +79,7 @@ jobs:
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - name: Write terraform.tfvars
         working-directory: 02-resman
         env:
@@ -112,7 +112,7 @@ jobs:
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - name: Write terraform.tfvars
         working-directory: 03-networking
         env:
@@ -143,7 +143,7 @@ jobs:
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - name: Write terraform.tfvars
         working-directory: 04-project-factory
         env:
@@ -178,7 +178,7 @@ jobs:
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - name: Write terraform.tfvars
         working-directory: 05-security
         env:
