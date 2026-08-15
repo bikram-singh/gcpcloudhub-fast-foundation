@@ -133,3 +133,18 @@ resource "google_compute_firewall" "allow_iap_ssh" {
 resource "google_compute_shared_vpc_host_project" "host" {
   project = google_project.net_host.project_id
 }
+
+resource "google_project_iam_audit_config" "net_host_audit" {
+  project = google_project.net_host.project_id
+  service = "allServices"
+
+  audit_log_config {
+    log_type = "ADMIN_READ"
+  }
+  audit_log_config {
+    log_type = "DATA_READ"
+  }
+  audit_log_config {
+    log_type = "DATA_WRITE"
+  }
+}

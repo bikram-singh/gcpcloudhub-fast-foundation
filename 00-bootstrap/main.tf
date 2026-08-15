@@ -36,6 +36,7 @@ resource "google_project_service" "seed_apis" {
     "orgpolicy.googleapis.com",
     "cloudbilling.googleapis.com",
     "billingbudgets.googleapis.com",
+    "logging.googleapis.com",
   ])
   project = google_project.seed.project_id
   service = each.value
@@ -147,4 +148,19 @@ resource "google_billing_budget" "trial_guard" {
     threshold_percent = 1.0
   }
 
+}
+
+resource "google_project_iam_audit_config" "seed_audit" {
+  project = google_project.seed.project_id
+  service = "allServices"
+
+  audit_log_config {
+    log_type = "ADMIN_READ"
+  }
+  audit_log_config {
+    log_type = "DATA_READ"
+  }
+  audit_log_config {
+    log_type = "DATA_WRITE"
+  }
 }

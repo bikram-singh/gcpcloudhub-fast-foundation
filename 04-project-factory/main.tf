@@ -75,3 +75,19 @@ resource "google_compute_shared_vpc_service_project" "attach" {
 
   depends_on = [google_project_service.workload_apis]
 }
+
+resource "google_project_iam_audit_config" "workload_audit" {
+  for_each = local.workloads
+  project  = google_project.workload[each.key].project_id
+  service  = "allServices"
+
+  audit_log_config {
+    log_type = "ADMIN_READ"
+  }
+  audit_log_config {
+    log_type = "DATA_READ"
+  }
+  audit_log_config {
+    log_type = "DATA_WRITE"
+  }
+}
