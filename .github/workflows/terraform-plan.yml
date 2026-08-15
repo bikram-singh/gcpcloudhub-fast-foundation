@@ -123,7 +123,7 @@ jobs:
     needs: plan
     steps:
       - uses: actions/checkout@v4
-      - uses: infracost/actions/setup@v3
+      - uses: infracost/actions/setup@v4
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
       - name: Generate cost estimate
@@ -132,7 +132,7 @@ jobs:
             --format=json \
             --out-file=/tmp/infracost.json || true
       - name: Post cost comment
-        uses: infracost/actions/comment@v1
+        uses: infracost/actions/comment@v4
         with:
           path: /tmp/infracost.json
           behavior: update
