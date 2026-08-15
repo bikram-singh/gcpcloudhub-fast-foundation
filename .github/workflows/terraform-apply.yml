@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
@@ -75,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
@@ -108,7 +108,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
@@ -139,7 +139,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
@@ -174,7 +174,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
