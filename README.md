@@ -128,9 +128,9 @@ Run it directly in the BigQuery Console, or via the bq query CLI:
 
 bq query --use_legacy_sql=false < 07-cost-visibility/queries/cost-by-department.sql
 
-## Known limitation: terraform-docs not integrated
+## Documentation generation
 
-Attempted to add terraform-docs as a pre-commit hook to auto-generate variable/output tables per stage, but the Go toolchain in this development environment (Cloud Shell) is incompatible with terraform-docs' build requirements, causing installation to fail. The per-stage README.md files with injection markers remain in place for future use once this is resolved in a compatible environment.
+Each stage's README.md includes an auto-generated variable/output/resource table via terraform-docs, wired into pre-commit. The initial attempt used a Go-compile-based hook which failed on Cloud Shell's toolchain; switched to the prebuilt-binary hook from the same pre-commit-terraform repo already used for fmt/validate/checkov, which resolved it without requiring any compilation.
 
 ## Testing
 
