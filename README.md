@@ -113,3 +113,17 @@ GitHub restricts repository secrets from workflows triggered by Dependabot PRs a
 ## Known limitation: Billing export activation is manual
 
 Terraform can create the BigQuery dataset for billing export (07-cost-visibility), but Google's Cloud Billing API does not expose a Terraform resource for actually linking billing export to that dataset. This is a one-time Console step (Billing > Billing export > Enable detailed export), not automatable via IaC as of this provider version.
+
+## Using the billing export
+
+Once daily billing data lands in `gch_billing_export` (starts the day after export was enabled), query actual spend by department/environment using `07-cost-visibility/queries/cost-by-department.sql` in BigQuery. This groups cost by the `department` label applied to every project in 04-project-factory, giving a real per-team cost breakdown rather than just a repo-wide total.
+
+Run it directly in the BigQuery Console, or via `bq query` CLI:
+
+## Using the billing export
+
+Once daily billing data lands in gch_billing_export (starts the day after export was enabled), query actual spend by department/environment using 07-cost-visibility/queries/cost-by-department.sql in BigQuery. This groups cost by the department label applied to every project in 04-project-factory, giving a real per-team cost breakdown rather than just a repo-wide total.
+
+Run it directly in the BigQuery Console, or via the bq query CLI:
+
+bq query --use_legacy_sql=false < 07-cost-visibility/queries/cost-by-department.sql
