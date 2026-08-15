@@ -60,3 +60,7 @@ cd ../03-networking && terraform init && terraform apply
 - Free-tier Cloud Billing accounts can only be linked to a limited number of projects simultaneously (observed limit: 5). The project factory uses an explicit `enabled_workloads` list rather than a full department x environment cross-product, so it stays within quota while keeping the underlying pattern factory-shaped and easy to extend.
 - Shared VPC requires the host project to be explicitly designated via `google_compute_shared_vpc_host_project`, separate from creating the VPC and subnets themselves.
 - API-quota-project routing (`user_project_override`) means every API a stage calls, including permission pre-checks like Cloud Billing's, must be enabled on the quota project itself.
+
+### Terrascan results
+
+Scanned with Terrascan v1.19.9: 191 policies evaluated, 0 violations (High/Medium/Low all zero). Terrascan and Checkov use different rule engines (OPA/Rego vs Bridgecrew) with different policy coverage, so results aren't directly comparable — running both provides complementary signal rather than a second opinion on the same checks. See security-scans/ for dated scan snapshots.

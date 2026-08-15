@@ -1,0 +1,31 @@
+2026/08/15 06:54:48 [DEBUG] GET https://registry.terraform.io/v1/providers/hashicorp/random/versions
+
+
+Scan Errors -
+
+	IaC Type            :	terraform
+	Directory           :	/home/admin_/gcpcloudhub-fast-foundation
+	Error Message       :	directory '/home/admin_/gcpcloudhub-fast-foundation' has no terraform config files
+	
+	-----------------------------------------------------------------------
+	
+	IaC Type            :	terraform
+	Directory           :	/home/admin_/gcpcloudhub-fast-foundation/03-project-factory
+	Error Message       :	directory '/home/admin_/gcpcloudhub-fast-foundation/03-project-factory' has no terraform config files
+	
+	-----------------------------------------------------------------------
+	
+
+
+Scan Summary -
+
+	File/Folder         :	/home/admin_/gcpcloudhub-fast-foundation
+	IaC Type            :	terraform
+	Scanned At          :	2026-08-15 06:54:51.595265217 +0000 UTC
+	Policies Validated  :	191
+	Violated Policies   :	0
+	Low                 :	0
+	Medium              :	0
+	High                :	0
+	
+
