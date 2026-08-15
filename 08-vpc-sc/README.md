@@ -21,10 +21,10 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [google_cloud_run_v2_service.demo](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloud_run_v2_service) | resource |
-| [google_cloud_run_v2_service_iam_member.public_invoker](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloud_run_v2_service_iam_member) | resource |
-| [google_compute_instance.demo_vm](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance) | resource |
-| [google_project_service.run_api](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_service) | resource |
+| [google_access_context_manager_access_policy.policy](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/access_context_manager_access_policy) | resource |
+| [google_access_context_manager_service_perimeter.perimeter](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/access_context_manager_service_perimeter) | resource |
+| [google_project.net_host](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/project) | data source |
+| [google_project.workloads](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/project) | data source |
 | [terraform_remote_state.networking](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state) | data source |
 | [terraform_remote_state.project_factory](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state) | data source |
 
@@ -32,14 +32,14 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_org_id"></a> [org\_id](#input\_org\_id) | n/a | `string` | n/a | yes |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"gch"` | no |
-| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"asia-south1"` | no |
 | <a name="input_state_bucket"></a> [state\_bucket](#input\_state\_bucket) | n/a | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_demo_service_url"></a> [demo\_service\_url](#output\_demo\_service\_url) | n/a |
-| <a name="output_demo_vm_internal_ip"></a> [demo\_vm\_internal\_ip](#output\_demo\_vm\_internal\_ip) | n/a |
+| <a name="output_access_policy_name"></a> [access\_policy\_name](#output\_access\_policy\_name) | n/a |
+| <a name="output_perimeter_name"></a> [perimeter\_name](#output\_perimeter\_name) | n/a |
 <!-- END_TF_DOCS -->
