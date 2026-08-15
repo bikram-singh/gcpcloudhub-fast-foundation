@@ -46,3 +46,9 @@ Current state: single region (asia-south1) for cost control on a free-tier accou
 - Cloud NAT and Cloud Router would need per-region instances
 - Org policies (01), folder hierarchy (02), and IAM (02, 05) remain unchanged since they are region-agnostic
 - Workload projects (04) would attach to whichever regional subnet fits their latency needs, without changing the project factory pattern itself
+
+## VPC Service Controls (implemented, dry-run mode)
+
+08-vpc-sc creates an Access Context Manager policy and a service perimeter around all workload and networking projects, restricting storage.googleapis.com, bigquery.googleapis.com, and secretmanager.googleapis.com. The perimeter runs in dry-run mode (use_explicit_dry_run_spec = true) - violations are logged in Cloud Logging without actually blocking traffic, which was the deliberate choice given live workloads (06-workload-demo) were already running when this stage was added.
+
+To graduate to enforced mode: review dry-run violation logs for false positives over an observation period (commonly 1-2 weeks in production), adjust the resource/service list based on findings, then set use_explicit_dry_run_spec = false and move the spec block's contents into status. This is a one-line config flip once the dry-run period confirms no unexpected blocks.
