@@ -9,7 +9,9 @@ terraform {
 }
 
 provider "google" {
-  region = var.region
+  region                  = var.region
+  user_project_override   = true
+  billing_project          = "gch-seed-28bdf9"
 }
 
 resource "random_id" "suffix" {
@@ -33,6 +35,7 @@ resource "google_project_service" "seed_apis" {
     "serviceusage.googleapis.com",
     "orgpolicy.googleapis.com",
     "cloudbilling.googleapis.com",
+    "billingbudgets.googleapis.com",
   ])
   project = google_project.seed.project_id
   service = each.value
@@ -116,4 +119,32 @@ terraform {
     bucket = "gch-tf-state-28bdf9"
     prefix = "00-bootstrap"
   }
+}
+
+# Budget alert to protect free-trial credits from silent overspend
+resource "google_billing_budget" "trial_guard" {
+  billing_account = var.billing_account_id
+  display_name    = "${var.prefix}-trial-budget-guard"
+
+  budget_filter {
+    projects = []
+  }
+
+  amount {
+    specified_amount {
+      currency_code = "INR"
+      units         = "20000"
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 0.5
+  }
+  threshold_rules {
+    threshold_percent = 0.9
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+  }
+
 }
