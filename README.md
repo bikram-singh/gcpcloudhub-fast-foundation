@@ -127,3 +127,7 @@ Once daily billing data lands in gch_billing_export (starts the day after export
 Run it directly in the BigQuery Console, or via the bq query CLI:
 
 bq query --use_legacy_sql=false < 07-cost-visibility/queries/cost-by-department.sql
+
+## Known limitation: terraform-docs not integrated
+
+Attempted to add terraform-docs as a pre-commit hook to auto-generate variable/output tables per stage, but the Go toolchain in this development environment (Cloud Shell) is incompatible with terraform-docs' build requirements, causing installation to fail. The per-stage README.md files with injection markers remain in place for future use once this is resolved in a compatible environment.
