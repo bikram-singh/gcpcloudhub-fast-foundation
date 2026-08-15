@@ -1,0 +1,8 @@
+# Org-wide policy guardrails require explicit review - highest blast radius
+/01-org-policies/ @bikram-singh
+
+# Security stage - audit logging, IAM, secrets
+/05-security/ @bikram-singh
+
+# Default owner for everything else
+* @bikram-singh

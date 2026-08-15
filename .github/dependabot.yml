@@ -1,0 +1,34 @@
+version: 2
+updates:
+  - package-ecosystem: "terraform"
+    directory: "/00-bootstrap"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/01-org-policies"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/02-resman"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/03-networking"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/04-project-factory"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/05-security"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/06-workload-demo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
