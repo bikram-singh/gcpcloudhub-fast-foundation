@@ -32,3 +32,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "infracost/actions"
+        update-types: ["version-update:semver-major"]
