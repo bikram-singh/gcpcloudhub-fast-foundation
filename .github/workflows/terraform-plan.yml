@@ -1,0 +1,42 @@
+name: Terraform Plan
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stage:
+          - 00-bootstrap
+          - 01-org-policies
+          - 02-resman
+          - 03-networking
+          - 04-project-factory
+          - 05-security
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ${{ matrix.stage }}
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ${{ matrix.stage }}
+        run: terraform plan -no-color

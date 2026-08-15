@@ -1,0 +1,99 @@
+name: Terraform Apply
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  apply-bootstrap:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: hashicorp/setup-terraform@v3
+      - working-directory: 00-bootstrap
+        run: terraform init && terraform apply -auto-approve
+
+  apply-org-policies:
+    needs: apply-bootstrap
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: hashicorp/setup-terraform@v3
+      - working-directory: 01-org-policies
+        run: terraform init && terraform apply -auto-approve
+
+  apply-resman:
+    needs: apply-org-policies
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: hashicorp/setup-terraform@v3
+      - working-directory: 02-resman
+        run: terraform init && terraform apply -auto-approve
+
+  apply-networking:
+    needs: apply-resman
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: hashicorp/setup-terraform@v3
+      - working-directory: 03-networking
+        run: terraform init && terraform apply -auto-approve
+
+  apply-project-factory:
+    needs: apply-networking
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: hashicorp/setup-terraform@v3
+      - working-directory: 04-project-factory
+        run: terraform init && terraform apply -auto-approve
+
+  apply-security:
+    needs: apply-project-factory
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: hashicorp/setup-terraform@v3
+      - working-directory: 05-security
+        run: terraform init && terraform apply -auto-approve
