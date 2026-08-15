@@ -96,3 +96,7 @@ While deploying the Stage 6 demo workload, `iam.allowedPolicyMemberDomains` (Sta
 ## Reusable module (template, not yet adopted)
 
 `modules/gcp-project` extracts the common pattern used across 00-bootstrap, 03-networking, and 04-project-factory: project creation, standard labels, API enablement, and full audit logging. It exists as a reference for future stages rather than a retrofit of existing ones — refactoring live, working infrastructure to adopt a module means new Terraform state addresses for every resource, which carries real risk (destroy-and-recreate without careful `terraform state mv`) against no functional benefit. The module demonstrates the DRY pattern; existing stages remain as-is since they work correctly and touching them wouldn't improve anything users or the org actually experience.
+
+## Known limitation: Infracost on Dependabot PRs
+
+GitHub restricts repository secrets from workflows triggered by Dependabot PRs as a security measure, so the Infracost cost-estimation job fails on Dependabot's own PRs (missing `INFRACOST_API_KEY`). This is expected and does not affect PRs opened by a human, where the secret is available normally.
