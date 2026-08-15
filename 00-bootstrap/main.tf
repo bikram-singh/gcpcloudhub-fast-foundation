@@ -46,6 +46,7 @@ resource "google_project_service" "seed_apis" {
     "logging.googleapis.com",
     "secretmanager.googleapis.com",
     "securitycenter.googleapis.com",
+    "accesscontextmanager.googleapis.com",
     "monitoring.googleapis.com",
   ])
   project = google_project.seed.project_id
