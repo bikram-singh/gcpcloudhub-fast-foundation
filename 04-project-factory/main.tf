@@ -59,6 +59,13 @@ resource "google_project" "workload" {
   folder_id           = each.value.folder_id
   billing_account     = var.billing_account_id
   auto_create_network = false
+
+  labels = {
+    department  = lower(each.value.department)
+    environment = each.value.env
+    cost-center = "${lower(each.value.department)}-${each.value.env}"
+    managed-by  = "terraform"
+  }
 }
 
 resource "google_project_service" "workload_apis" {

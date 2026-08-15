@@ -34,6 +34,13 @@ resource "google_project" "net_host" {
   folder_id       = data.terraform_remote_state.resman.outputs.prod_folder_ids["IT"]
   billing_account = var.billing_account_id
   auto_create_network = false
+
+  labels = {
+    department  = "it"
+    environment = "shared"
+    cost-center = "platform-eng"
+    managed-by  = "terraform"
+  }
 }
 
 resource "google_project_service" "net_apis" {

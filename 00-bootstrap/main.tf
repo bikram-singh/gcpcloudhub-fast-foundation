@@ -24,6 +24,13 @@ resource "google_project" "seed" {
   org_id          = var.org_id
   auto_create_network = false
   billing_account = var.billing_account_id
+
+  labels = {
+    department  = "platform"
+    environment = "shared"
+    cost-center = "platform-eng"
+    managed-by  = "terraform"
+  }
 }
 
 resource "google_project_service" "seed_apis" {
