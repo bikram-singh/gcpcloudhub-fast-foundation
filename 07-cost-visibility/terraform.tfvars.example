@@ -1,0 +1,4 @@
+prefix              = "abc"
+region              = "us-central1"
+seed_project_id     = "abc-seed-xxxxxx"
+billing_account_id  = "XXXXXX-XXXXXX-XXXXXX"

@@ -1,0 +1,5 @@
+org_id             = "123456789012"
+billing_account_id = "XXXXXX-XXXXXX-XXXXXX"
+prefix             = "abc"
+region             = "us-central1"
+state_bucket       = "abc-tf-state-xxxxxx"

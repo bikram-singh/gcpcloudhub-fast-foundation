@@ -1,0 +1,4 @@
+org_id           = "123456789012"
+prefix           = "abc"
+seed_project_id  = "abc-seed-xxxxxx"
+state_bucket     = "abc-tf-state-xxxxxx"

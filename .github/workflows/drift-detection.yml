@@ -1,0 +1,153 @@
+name: Drift Detection
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+jobs:
+  detect-drift:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stage:
+          - 00-bootstrap
+          - 01-org-policies
+          - 02-resman
+          - 03-networking
+          - 04-project-factory
+          - 05-security
+          - 06-workload-demo
+          - 07-cost-visibility
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Write terraform.tfvars
+        working-directory: ${{ matrix.stage }}
+        env:
+          ORG_ID: ${{ vars.GCP_ORG_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          PREFIX: ${{ vars.GCP_PREFIX }}
+          CUSTOMER_ID: ${{ vars.GCP_CUSTOMER_ID }}
+          DOMAIN: ${{ vars.GCP_DOMAIN }}
+          STATE_BUCKET: ${{ vars.GCP_STATE_BUCKET }}
+          SEED_PROJECT_ID: ${{ vars.GCP_SEED_PROJECT_ID }}
+          GH_REPO_REF: ${{ vars.GH_REPO_REF }}
+          BILLING_ACCOUNT_ID: ${{ secrets.GCP_BILLING_ACCOUNT_ID }}
+        run: |
+          case "${{ matrix.stage }}" in
+            00-bootstrap)
+              cat > terraform.tfvars << EOF
+          org_id             = "$ORG_ID"
+          billing_account_id = "$BILLING_ACCOUNT_ID"
+          domain             = "$DOMAIN"
+          prefix             = "$PREFIX"
+          region             = "$REGION"
+          github_repo        = "$GH_REPO_REF"
+          EOF
+              ;;
+            01-org-policies)
+              cat > terraform.tfvars << EOF
+          org_id       = "$ORG_ID"
+          customer_id  = "$CUSTOMER_ID"
+          state_bucket = "$STATE_BUCKET"
+          EOF
+              ;;
+            02-resman)
+              cat > terraform.tfvars << EOF
+          org_id      = "$ORG_ID"
+          prefix      = "$PREFIX"
+          departments = ["HR", "Finance", "IT", "Sales", "AI"]
+          groups = {
+            org_admins      = "gcp-organization-admins@$DOMAIN"
+            billing_admins  = "gcp-billing-admins@$DOMAIN"
+            devops          = "gcp-devops@$DOMAIN"
+            security_admins = "gcp-security-admins@$DOMAIN"
+          }
+          EOF
+              ;;
+            03-networking)
+              cat > terraform.tfvars << EOF
+          org_id             = "$ORG_ID"
+          billing_account_id = "$BILLING_ACCOUNT_ID"
+          prefix             = "$PREFIX"
+          region             = "$REGION"
+          state_bucket       = "$STATE_BUCKET"
+          EOF
+              ;;
+            04-project-factory)
+              cat > terraform.tfvars << EOF
+          org_id             = "$ORG_ID"
+          billing_account_id = "$BILLING_ACCOUNT_ID"
+          prefix             = "$PREFIX"
+          departments        = ["HR", "Finance", "IT", "Sales", "AI"]
+          state_bucket       = "$STATE_BUCKET"
+          enabled_workloads = [
+            { department = "HR",    env = "prod" },
+            { department = "HR",    env = "nonprod" },
+            { department = "Sales", env = "nonprod" },
+          ]
+          EOF
+              ;;
+            05-security)
+              cat > terraform.tfvars << EOF
+          org_id           = "$ORG_ID"
+          prefix           = "$PREFIX"
+          seed_project_id  = "$SEED_PROJECT_ID"
+          state_bucket     = "$STATE_BUCKET"
+          EOF
+              ;;
+            06-workload-demo)
+              cat > terraform.tfvars << EOF
+          prefix       = "$PREFIX"
+          region       = "$REGION"
+          state_bucket = "$STATE_BUCKET"
+          EOF
+              ;;
+            07-cost-visibility)
+              cat > terraform.tfvars << EOF
+          prefix              = "$PREFIX"
+          region              = "$REGION"
+          seed_project_id     = "$SEED_PROJECT_ID"
+          billing_account_id  = "$BILLING_ACCOUNT_ID"
+          EOF
+              ;;
+          esac
+
+      - name: Terraform Init
+        working-directory: ${{ matrix.stage }}
+        run: terraform init
+
+      - name: Detect drift
+        working-directory: ${{ matrix.stage }}
+        id: plan
+        run: |
+          terraform plan -detailed-exitcode -no-color
+        continue-on-error: true
+
+      - name: Report drift as issue
+        if: steps.plan.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Drift detected in ${{ matrix.stage }}`,
+              body: `Scheduled drift check found unexpected changes in ${{ matrix.stage }}. Check the Actions run for the full plan output.`,
+              labels: ['drift-detection']
+            });
