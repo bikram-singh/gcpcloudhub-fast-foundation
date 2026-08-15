@@ -38,3 +38,11 @@ Current state: single region (asia-south1) for cost control on a free-tier accou
 - Cloud NAT and Cloud Router would need per-region instances
 - Org policies (01), folder hierarchy (02), and IAM (02, 05) remain unchanged since they are region-agnostic
 - Workload projects (04) would attach to whichever regional subnet fits their latency needs, without changing the project factory pattern itself
+
+## Multi-region readiness (not implemented, documented for future extension)
+
+Current state: single region (asia-south1) for cost control on a free-tier account. To extend to multi-region:
+- 03-networking would need a second regional subnet pair (prod/nonprod) in the new region, added to the existing shared VPC (VPCs are global; subnets are regional)
+- Cloud NAT and Cloud Router would need per-region instances
+- Org policies (01), folder hierarchy (02), and IAM (02, 05) remain unchanged since they are region-agnostic
+- Workload projects (04) would attach to whichever regional subnet fits their latency needs, without changing the project factory pattern itself
