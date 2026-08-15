@@ -131,3 +131,7 @@ bq query --use_legacy_sql=false < 07-cost-visibility/queries/cost-by-department.
 ## Known limitation: terraform-docs not integrated
 
 Attempted to add terraform-docs as a pre-commit hook to auto-generate variable/output tables per stage, but the Go toolchain in this development environment (Cloud Shell) is incompatible with terraform-docs' build requirements, causing installation to fail. The per-stage README.md files with injection markers remain in place for future use once this is resolved in a compatible environment.
+
+## Testing
+
+Native Terraform tests (`terraform test`, requires Terraform 1.6+) validate key assertions for `01-org-policies` (policy configuration correctness) and `02-resman` (folder structure counts). Tests run automatically on every pull request via the plan workflow. Coverage is intentionally partial — a fuller test suite covering every stage is a natural next step, consciously scoped down here in favor of breadth across the rest of the landing zone (security, cost visibility, CI/CD) within reasonable project scope.
