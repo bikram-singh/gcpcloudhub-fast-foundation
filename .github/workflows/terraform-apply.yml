@@ -237,7 +237,7 @@ jobs:
       - name: Extract monthly cost
         id: cost
         run: |
-          COST=$(cat /tmp/infracost.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('totalMonthlyCost','0'))" 2>/dev/null || echo "0")
+          COST=$(cat /tmp/infracost.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(f\"{float(d.get('totalMonthlyCost','0')):.2f}\")" 2>/dev/null || echo "0.00")
           echo "amount=$COST" >> "$GITHUB_OUTPUT"
       - name: Update cost badge gist
         uses: schneegans/dynamic-badges-action@v1.7.0
