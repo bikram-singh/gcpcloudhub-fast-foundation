@@ -109,3 +109,7 @@ While deploying the Stage 6 demo workload, `iam.allowedPolicyMemberDomains` (Sta
 ## Known limitation: Infracost on Dependabot PRs
 
 GitHub restricts repository secrets from workflows triggered by Dependabot PRs as a security measure, so the Infracost cost-estimation job fails on Dependabot's own PRs (missing `INFRACOST_API_KEY`). This is expected and does not affect PRs opened by a human, where the secret is available normally.
+
+## Known limitation: Billing export activation is manual
+
+Terraform can create the BigQuery dataset for billing export (07-cost-visibility), but Google's Cloud Billing API does not expose a Terraform resource for actually linking billing export to that dataset. This is a one-time Console step (Billing > Billing export > Enable detailed export), not automatable via IaC as of this provider version.
