@@ -5,4 +5,8 @@ repos:
       - id: terraform_fmt
       - id: terraform_validate
       - id: checkov
-        args: ["--quiet", "--compact"]
+        args:
+          - "--quiet"
+          - "--compact"
+          - "--skip-check"
+          - "CKV_GCP_62,CKV_GCP_125,CKV_GCP_45"

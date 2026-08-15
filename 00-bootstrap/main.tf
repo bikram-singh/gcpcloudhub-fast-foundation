@@ -9,9 +9,9 @@ terraform {
 }
 
 provider "google" {
-  region                  = var.region
-  user_project_override   = true
-  billing_project          = "gch-seed-28bdf9"
+  region                = var.region
+  user_project_override = true
+  billing_project       = "gch-seed-28bdf9"
 }
 
 resource "random_id" "suffix" {
@@ -19,11 +19,11 @@ resource "random_id" "suffix" {
 }
 
 resource "google_project" "seed" {
-  name            = "${var.prefix}-seed"
-  project_id      = "${var.prefix}-seed-${random_id.suffix.hex}"
-  org_id          = var.org_id
+  name                = "${var.prefix}-seed"
+  project_id          = "${var.prefix}-seed-${random_id.suffix.hex}"
+  org_id              = var.org_id
   auto_create_network = false
-  billing_account = var.billing_account_id
+  billing_account     = var.billing_account_id
 
   labels = {
     department  = "platform"
@@ -45,6 +45,8 @@ resource "google_project_service" "seed_apis" {
     "billingbudgets.googleapis.com",
     "logging.googleapis.com",
     "secretmanager.googleapis.com",
+    "securitycenter.googleapis.com",
+    "monitoring.googleapis.com",
   ])
   project = google_project.seed.project_id
   service = each.value
@@ -61,7 +63,7 @@ resource "google_storage_bucket" "tf_state" {
   }
 
   uniform_bucket_level_access = true
-  public_access_prevention     = "enforced"
+  public_access_prevention    = "enforced"
 
   depends_on = [google_project_service.seed_apis]
 }
@@ -88,8 +90,8 @@ resource "google_organization_iam_member" "automation_folder_admin" {
 
 resource "google_billing_account_iam_member" "automation_billing_admin" {
   billing_account_id = var.billing_account_id
-  role                = "roles/billing.admin"
-  member              = "serviceAccount:${google_service_account.automation.email}"
+  role               = "roles/billing.admin"
+  member             = "serviceAccount:${google_service_account.automation.email}"
 }
 
 resource "google_iam_workload_identity_pool" "github" {
@@ -119,8 +121,8 @@ resource "google_iam_workload_identity_pool_provider" "github" {
 
 resource "google_service_account_iam_member" "wif_impersonation" {
   service_account_id = google_service_account.automation.name
-  role                = "roles/iam.workloadIdentityUser"
-  member              = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repo}"
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repo}"
 }
 
 terraform {

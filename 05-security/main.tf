@@ -14,7 +14,7 @@ terraform {
 
 provider "google" {
   user_project_override = true
-  billing_project        = "gch-seed-28bdf9"
+  billing_project       = "gch-seed-28bdf9"
 }
 
 # Dedicated logging bucket for centralized audit logs
@@ -30,7 +30,7 @@ resource "google_logging_organization_sink" "org_audit_sink" {
   name             = "${var.prefix}-org-audit-sink"
   org_id           = var.org_id
   destination      = "logging.googleapis.com/projects/${var.seed_project_id}/locations/asia-south1/buckets/${google_logging_project_bucket_config.audit_logs.bucket_id}"
-  include_children  = true
+  include_children = true
 
   filter = "logName:\"cloudaudit.googleapis.com\""
 }
@@ -80,8 +80,8 @@ resource "google_secret_manager_secret" "example_workload_secret" {
   }
 
   labels = {
-    department  = "platform"
-    managed-by  = "terraform"
+    department = "platform"
+    managed-by = "terraform"
   }
 }
 
@@ -92,4 +92,47 @@ resource "google_secret_manager_secret_iam_member" "devops_secret_accessor" {
   secret_id = google_secret_manager_secret.example_workload_secret.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "group:gcp-devops@gcpcloudhub.in"
+}
+
+resource "google_logging_metric" "iam_policy_changes" {
+  project = var.seed_project_id
+  name    = "${var.prefix}-iam-policy-changes"
+  filter  = "protoPayload.methodName=\"SetIamPolicy\""
+
+  metric_descriptor {
+    metric_kind = "DELTA"
+    value_type  = "INT64"
+  }
+}
+
+resource "google_monitoring_notification_channel" "email" {
+  project      = var.seed_project_id
+  display_name = "GCH Admin Email"
+  type         = "email"
+
+  labels = {
+    email_address = "admin@gcpcloudhub.in"
+  }
+}
+
+resource "google_monitoring_alert_policy" "iam_changes" {
+  project      = var.seed_project_id
+  display_name = "${var.prefix}-iam-policy-change-alert"
+  combiner     = "OR"
+
+  conditions {
+    display_name = "IAM policy changed"
+    condition_threshold {
+      filter          = "resource.type=\"global\" AND metric.type=\"logging.googleapis.com/user/${google_logging_metric.iam_policy_changes.name}\""
+      comparison      = "COMPARISON_GT"
+      threshold_value = 0
+      duration        = "0s"
+      aggregations {
+        alignment_period   = "300s"
+        per_series_aligner = "ALIGN_COUNT"
+      }
+    }
+  }
+
+  notification_channels = [google_monitoring_notification_channel.email.id]
 }
