@@ -69,3 +69,50 @@ resource "google_cloud_run_v2_service_iam_member" "public_invoker" {
   role     = "roles/run.invoker"
   member   = "domain:gcpcloudhub.in"
 }
+
+data "terraform_remote_state" "networking" {
+  backend = "gcs"
+  config = {
+    bucket = var.state_bucket
+    prefix = "03-networking"
+  }
+}
+
+# Minimal demo VM - no external IP (blocked by org policy anyway),
+# attached to the existing shared VPC NonProd subnet.
+resource "google_compute_instance" "demo_vm" {
+  name                      = "${var.prefix}-demo-vm"
+  project                   = local.workload_project_id
+  zone                      = "${var.region}-a"
+  machine_type              = "e2-micro"
+  allow_stopping_for_update = true
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+      size  = 10
+      type  = "pd-standard"
+    }
+  }
+
+  network_interface {
+    subnetwork = data.terraform_remote_state.networking.outputs.nonprod_subnet_self_link
+    # No access_config block = no external IP
+  }
+
+  metadata = {
+    block-project-ssh-keys = "true"
+  }
+
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
+
+  labels = {
+    department  = "hr"
+    environment = "nonprod"
+    managed-by  = "terraform"
+  }
+}
