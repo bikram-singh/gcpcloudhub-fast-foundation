@@ -88,3 +88,7 @@ The automation service account had org-level admin roles (from Stage 0) but had 
 ## Secret Manager pattern
 
 A Secret Manager container (`gch-example-db-credential`) demonstrates the intended pattern for workload credentials: the secret container is Terraform-managed, but no secret value is ever stored in Terraform state, `.tfvars`, or committed code. Values are set out-of-band (via `gcloud secrets versions add` or the Console) by whoever operates the workload that needs it. Access is scoped to the `gcp-devops` group via `secretAccessor`, not project-wide or org-wide.
+
+## Org policy in action
+
+While deploying the Stage 6 demo workload, `iam.allowedPolicyMemberDomains` (Stage 1) automatically blocked an attempt to grant `allUsers` access to a Cloud Run service, since `allUsers` isn't a principal from the `gcpcloudhub.in` domain. This is the guardrail working as intended — access was scoped to `domain:gcpcloudhub.in` instead. A concrete example of an org-wide policy preventing an accidental public-exposure misconfiguration before it happened.
