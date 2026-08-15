@@ -71,3 +71,13 @@ cd ../03-networking && terraform init && terraform apply
 ### Terrascan results
 
 Scanned with Terrascan v1.19.9: 191 policies evaluated, 0 violations (High/Medium/Low all zero). Terrascan and Checkov use different rule engines (OPA/Rego vs Bridgecrew) with different policy coverage, so results aren't directly comparable — running both provides complementary signal rather than a second opinion on the same checks. See security-scans/ for dated scan snapshots.
+
+## CI/CD
+
+- `.github/workflows/terraform-plan.yml` — runs `terraform plan` across all 6 stages on every pull request, authenticated via Workload Identity Federation (no service account keys).
+- `.github/workflows/terraform-apply.yml` — runs `terraform apply` in strict dependency order (bootstrap → org-policies → resman → networking → project-factory → security) on merge to main, gated behind a `prod` GitHub Environment requiring manual approval before each stage applies.
+- Stage variables and secrets are injected from GitHub Actions repo variables/secrets at runtime rather than committed `.tfvars` files, which remain gitignored and local-only.
+
+### Lessons learned from wiring up CI
+
+The automation service account had org-level admin roles (from Stage 0) but had never been granted ownership on the individual projects it needed to manage, since all prior applies ran under a human user's credentials in Cloud Shell. Moving to CI surfaced these gaps immediately: the SA needed explicit Owner on each project (seed, networking host, workload projects) and explicit org-level `logging.admin` and `iam.organizationRoleAdmin` roles to match what the human operator had accumulated ad hoc. This is a good illustration of why CI/CD matters even for a solo project — it forces the automation identity's actual permissions to be complete and explicit, rather than silently depending on a human's broader access.
