@@ -262,12 +262,13 @@ jobs:
           framework: terraform
           skip_check: CKV_GCP_62,CKV_GCP_125,CKV_GCP_45,CKV_GCP_38,CKV_GCP_81
           soft_fail: true
-          output_format: json
+          output_format: cli,json
           output_file_path: console,/tmp/checkov.json
       - name: Extract pass count
         id: count
         run: |
-          PASSED=$(python3 -c "import json,os; d=json.loads(os.environ.get('CHECKOV_RESULTS','{}')); print(len(d.get('results',{}).get('passed_checks',[])))" 2>/dev/null || echo "?")
+          ls -la /tmp/checkov.json || echo "file missing"
+          PASSED=$(python3 -c "import json; d=json.load(open('/tmp/checkov.json')); print(len(d.get('results',{}).get('passed_checks',[])))" 2>/dev/null || echo "?")
           echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
       - name: Update checkov badge gist
         uses: schneegans/dynamic-badges-action@v1.7.0
