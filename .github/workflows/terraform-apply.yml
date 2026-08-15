@@ -265,8 +265,7 @@ jobs:
       - name: Extract pass count
         id: count
         run: |
-          find /tmp/checkov-out -type f
-          PASSED=$(python3 -c "import json,glob; files=glob.glob('/tmp/checkov-out/**/*.json', recursive=True); d=json.load(open(files[0])) if files else {}; print(len(d.get('results',{}).get('passed_checks',[])) or '?')" 2>/dev/null || echo "?")
+          PASSED=$(python3 -c "import json; d=json.load(open('/tmp/checkov-out/results_json.json')); print(next((i['summary']['passed'] for i in d if i.get('check_type')=='terraform'), '?'))" 2>/dev/null || echo "?")
           echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
       - name: Update checkov badge gist
         uses: schneegans/dynamic-badges-action@v1.7.0
