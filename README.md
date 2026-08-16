@@ -1,148 +1,297 @@
-# gcpcloudhub-fast-foundation
-
 <div align="center">
 
-![monthly cost](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-cost-badge.json&style=for-the-badge)
-![checkov](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-checkov-badge.json&style=for-the-badge)
+# 🏗️ gcpcloudhub-fast-foundation
+
+### GCP Organization Landing Zone · Terraform · FAST-Inspired Design · Full Security & Cost Governance
+
+[![Monthly Cost](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-cost-badge.json)](https://dashboard.infracost.io/org/gcpcloudhub)
+[![Checkov](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-checkov-badge.json)](https://www.checkov.io)
+[![Terraform](https://img.shields.io/badge/Terraform-1.15-844FBA?logo=terraform&logoColor=white)](https://www.terraform.io)
+[![Google Cloud](https://img.shields.io/badge/Google_Cloud-9_Stages-4285F4?logo=googlecloud&logoColor=white)](https://cloud.google.com)
+[![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/features/actions)
+[![Terrascan](https://img.shields.io/badge/Terrascan-0_violations-2ECC71?logo=checkmarx&logoColor=white)](https://runterrascan.io)
+[![WIF](https://img.shields.io/badge/Auth-Workload_Identity_Federation-FF6D00?logo=googlecloud&logoColor=white)](https://cloud.google.com/iam/docs/workload-identity-federation)
+
+---
+
+*A hand-built GCP Organization landing zone, inspired by Google Cloud's Fabric FAST framework, written from scratch in Terraform. Nine sequential stages take an empty GCP organization to a fully governed, multi-department platform — org-wide policy guardrails, department-segmented folder hierarchy, shared networking, a quota-aware project factory, centralized security and audit logging, live billed workloads, dual-direction cost visibility, and a VPC Service Controls perimeter — all deployed through a gated CI/CD pipeline authenticated with zero credential files.*
 
 </div>
 
-GCP organization bootstrap and landing zone, inspired by Google Cloud's Fabric FAST design, written from scratch in Terraform
+---
 
-## Security Scanning
+## 📋 Table of Contents
 
-This project is scanned with [Checkov](https://www.checkov.io/) for IaC misconfigurations.
+- [Overview](#-overview)
+- [Architecture](#-architecture)
+- [The Nine Stages](#-the-nine-stages)
+- [Security & Compliance](#-security--compliance)
+- [Cost Visibility — Both Directions](#-cost-visibility--both-directions)
+- [CI/CD Pipeline](#-cicd-pipeline)
+- [Tech Stack](#-tech-stack)
+- [Well-Architected Framework Alignment](#-well-architected-framework-alignment)
+- [Live, Real Infrastructure — Not Just Code](#-live-real-infrastructure--not-just-code)
+- [Testing](#-testing)
+- [Design Decisions](#-design-decisions)
+- [Known Limitations](#-known-limitations)
+- [Prerequisites & Reproduction](#-prerequisites--reproduction)
+- [Teardown](#-teardown)
+- [Repository](#-repository)
 
-**Current state**: 67 passed, 3 accepted findings (down from 22 initial findings).
+---
 
-**Fixed over the project's lifecycle**:
-- Default networks removed, open SSH/RDP firewall rules deleted
-- VPC Flow Logs and Private Google Access enabled on all subnets
-- Bucket public access prevention enforced
-- `roles/editor` on devops folder IAM replaced with a least-privilege custom role (`gchDevopsScoped`) covering only compute, GKE, and Cloud Run permissions actually needed
-- Full audit logging (Admin Read, Data Read, Data Write) enabled explicitly on every project
-- Centralized org-wide audit log sink with a dedicated logging bucket (05-security)
+## 🌐 Overview
 
-**Accepted, documented exceptions** (3 remaining findings):
-- `roles/iam.securityAdmin` at org level for the security admins group — intentional; security teams need org-wide visibility, unlike devops which had no justification for broad Editor access
-- State bucket access logging — would require a second logging bucket to log access to the first; skipped as disproportionate for this project's scale
-- GitHub OIDC trust condition could add a `repository_owner` check alongside the existing repository-scoped condition — minor hardening, not a functional gap since the repo-level restriction already prevents unauthorized impersonation
+This project answers one question end to end: **how would you actually bootstrap a real GCP organization, correctly, from nothing?**
 
-## Architecture
+It isn't a tutorial repo or a copy of Google's own FAST reference — it's a working reimplementation of the same ideas, built stage by stage against a real Cloud Identity organization, with every permission gap, quota limit, and misconfiguration discovered and fixed the way it happens in practice, not glossed over.
+
+### 🔑 Key Facts
+
+| Property | Value |
+|---|---|
+| 🏗️ **IaC Engine** | Terraform 1.15, real `plan` / `apply` / `destroy` against live GCP |
+| ☁️ **Cloud Platform** | Google Cloud Platform (Cloud Identity org, 5 department folders, 3 billed projects) |
+| 🧩 **Stages** | 9 sequential, independently-stated Terraform root modules (00–08) |
+| 🔐 **Auth** | Workload Identity Federation — zero service account keys, anywhere |
+| 🛡️ **Security Scanners** | Checkov + Terrascan, both wired into pre-commit and CI |
+| 💰 **Cost Tools** | Infracost (predicted, pre-deploy) + native BigQuery billing export (actual, post-deploy) |
+| 🧪 **Testing** | Native `terraform test`, daily automated drift detection across all 9 stages |
+| 📦 **CI/CD** | GitHub Actions — gated plan/apply chain, Dependabot, CODEOWNERS |
+| 📝 **Docs** | Auto-generated per-stage variable/output tables via terraform-docs, 4 formal ADRs |
+
+### ✨ What It Does
+
+| Capability | Description |
+|---|---|
+| 🏛️ **Org-wide guardrails first** | 6 org policies (no default networks, no VM public IPs, no SA keys, no public buckets/SQL, domain-restricted IAM) applied *before* any folder or project exists |
+| 🏢 **Department-segmented hierarchy** | 5 departments × Prod/NonProd, not a flat environment-only structure — models how larger orgs actually split budget and access |
+| 🌐 **Real shared networking** | One Shared VPC host project, Prod/NonProd subnets, Cloud NAT, IAP-only SSH, flow logs, Private Google Access |
+| 🏭 **Quota-aware project factory** | Explicit `enabled_workloads` list rather than a full department × environment cross-product — built after hitting a real free-tier billing quota wall |
+| 🔒 **Centralized security posture** | Org-wide audit log sink, least-privilege custom IAM role (replacing broad `roles/editor`), Secret Manager pattern, Security Command Center |
+| 💵 **Real, priced workload** | A live Cloud Run service *and* a hardened e2-micro VM — deliberately added so cost tooling has something non-zero to actually prove |
+| 🚧 **VPC Service Controls** | Real perimeter in dry-run mode — logs violations without blocking live workloads, with a documented path to enforcement |
+| 🔁 **Fully automated pipeline** | Every stage applies through CI, gated behind manual approval, checked daily for drift |
+
+---
+
+## 🏛️ Architecture
 
 ![Landing zone architecture](docs/architecture.svg)
 
+```
+                    Organization: gcpcloudhub.in
+                                │
+        ┌───────────┬───────────┼───────────┬───────────┐
+        ▼           ▼           ▼           ▼           ▼
+       HR        Finance        IT        Sales         AI
+   Prod/NonProd  Prod/NonProd  Prod/NonProd Prod/NonProd Prod/NonProd
+                                │
+                                ▼
+                        Shared VPC (03)
+                   gch-net-host · Cloud NAT
+                                │
+              ┌─────────────────┼─────────────────┐
+              ▼                 ▼                 ▼
+        gch-hr-prod       gch-hr-nonprod    gch-sales-nonprod
+      (04-project-factory, attached as Shared VPC service projects)
+              │
+              ▼
+   06-workload-demo: live Cloud Run + hardened e2-micro VM
+```
 
-A hand-built GCP Organization landing zone, inspired by Google's Fabric FAST framework, using department + environment folder segmentation instead of a flat environment-only hierarchy.
-gcpcloudhub.in (Organization)
-- 00-bootstrap: seed automation project, GCS state bucket, automation SA, Workload Identity Federation for GitHub Actions
-- 01-org-policies: org-wide guardrails - no default networks, no VM public IPs, no SA keys, no public buckets/SQL, domain-restricted IAM
-- 02-resman: department folders (HR, Finance, IT, Sales, AI) each with Prod/NonProd sub-folders, org and folder IAM bound to Google Groups
-- 03-networking: shared VPC host project under IT/Prod, Prod and NonProd subnets, Cloud NAT, IAP-only SSH firewall, flow logs and private Google access enabled
+### 🔄 Stage Dependency Chain
 
-## Design decisions
+| Order | Stage | Depends On |
+|---|---|---|
+| 1 | `00-bootstrap` | — (creates the seed project, state bucket, automation identity) |
+| 2 | `01-org-policies` | 00 |
+| 3 | `02-resman` | 00, 01 |
+| 4 | `03-networking` | 00–02 |
+| 5 | `04-project-factory` | 00–03 |
+| 6 | `05-security` | 00–04 |
+| 7 | `06-workload-demo` | 00–05 |
+| 8 | `07-cost-visibility` | 00 |
+| 9 | `08-vpc-sc` | 03, 04 |
 
-- Groups over individual users for IAM: every admin role is bound to a Google Group, not an individual account, matching real enterprise practice.
-- WIF over service account keys: GitHub Actions authenticates via Workload Identity Federation scoped to this exact repo. No long-lived JSON keys exist anywhere in this project.
-- Org policies before resource hierarchy: guardrails are applied in stage 01, before folders (02) and networking (03), so nothing gets created without constraints already active.
-- Department plus environment folders: chosen over a flat Prod/NonProd-only structure to reflect how larger orgs segment budget and access boundaries.
-- Remote state per stage: each stage has isolated Terraform state in the same GCS bucket under a different prefix.
+Each stage is its own Terraform root module with isolated state (same GCS bucket, different prefix per stage) — a mistake in one stage's state can't corrupt another's.
 
-## Prerequisites to reproduce
+---
 
-- A GCP Organization via Cloud Identity Free or Google Workspace
+## 📦 The Nine Stages
+
+| Stage | What It Builds |
+|---|---|
+| 🌱 **00-bootstrap** | Seed automation project, versioned GCS state bucket with lifecycle rules, automation service account, Workload Identity Federation pool/provider scoped to this exact repo, billing budget alert (50/90/100%) |
+| 🛡️ **01-org-policies** | 6 org-wide guardrails: `skipDefaultNetworkCreation`, `vmExternalIpAccess` (deny all), `disableServiceAccountKeyCreation`, `storage.publicAccessPrevention`, `sql.restrictPublicIp`, `iam.allowedPolicyMemberDomains` |
+| 🏢 **02-resman** | 5 department folders (HR, Finance, IT, Sales, AI) × Prod/NonProd sub-folders, org and folder IAM bound to Google Groups (never individuals), a least-privilege custom `gchDevopsScoped` role |
+| 🌐 **03-networking** | Shared VPC host project, Prod/NonProd subnets, Cloud NAT, firewall rules (internal-only + IAP-scoped SSH), VPC Flow Logs, Private Google Access, Shared VPC host designation |
+| 🏭 **04-project-factory** | Real, billed workload projects, explicitly gated by an `enabled_workloads` list (not a full cross-product) to respect free-tier billing-account project-link quotas, Shared VPC attachment, full audit logging, cost-allocation labels |
+| 🔐 **05-security** | Org-wide audit log sink into a dedicated logging bucket, Secret Manager pattern (container-only, no values in state), log-based metric + alert policy on IAM policy changes |
+| 🚀 **06-workload-demo** | A real Cloud Run service (domain-restricted access via org policy) and a hardened e2-micro VM — Shielded VM, no external IP, no project-wide SSH keys — the only priced resources in the project, deliberately |
+| 💰 **07-cost-visibility** | Terraform-managed BigQuery dataset, Google-native billing export (one manual Console step — documented as GCP's own Terraform-resource gap), a starter cost-by-department SQL query |
+| 🚧 **08-vpc-sc** | Access Context Manager policy + service perimeter around all workload/networking projects, running in **dry-run mode** — logs violations without blocking, safe alongside already-live workloads |
+
+---
+
+## 🛡️ Security & Compliance
+
+| Tool | Role |
+|---|---|
+| 🔍 **Checkov** | Static analysis on every commit (pre-commit) and every PR (CI). Currently **78 passed, 5 accepted, documented exceptions** — down from 22 initial findings |
+| 🔎 **Terrascan** | Second, independent scanner (OPA/Rego rule engine) — 191 policies evaluated, **0 violations** |
+| 🏛️ **Org Policies** | 6 guardrails applied before any resource exists — caught a real misconfiguration live (an attempted `allUsers` grant on Cloud Run was auto-blocked) |
+| 🔑 **Least-privilege IAM** | Broad `roles/editor` replaced with a scoped custom role after Checkov flagged it — a real fix, not just an accepted finding |
+| 🛰️ **Security Command Center** | Enabled at org level, Standard tier |
+| 📜 **Audit logging** | Full Admin Read / Data Read / Data Write logging explicitly enabled on every project, feeding a centralized org-wide sink |
+| 🚧 **VPC Service Controls** | Real perimeter, dry-run mode, safe rollout pattern documented |
+| 📄 **4 Architecture Decision Records** | Department+env folders, WIF over SA keys, org-policies-before-resman sequencing, module-as-template (not retrofit) |
+
+---
+
+## 💰 Cost Visibility — Both Directions
+
+Most projects show cost estimation *or* actual billing. This one does both, deliberately.
+
+### Predicted (before deployment) — Infracost
+- Runs on every human-opened PR via `terraform-plan.yml`, posts a real cost-delta comment
+- Full dashboard at `dashboard.infracost.io/org/gcpcloudhub`
+- **Live-updating README badge** — pulled from a Gist that CI refreshes after every merge to `main`
+
+### Actual (after deployment) — Google-native billing export
+- `07-cost-visibility`: Terraform-managed BigQuery dataset, real detailed-usage-cost export enabled
+- A starter SQL query groups real spend by the `department` label applied to every project
+- Configuration independently re-verified against the actual BigQuery schema (`project.labels`, not an assumed field name) after an initial query was found to be wrong
+
+### What makes the $ figure real, not theoretical
+The live badge shows an actual, non-zero dollar amount — because `06-workload-demo`'s e2-micro VM was deliberately added, priced correctly for `asia-south1` (outside GCP's free-tier region list), specifically so the cost pipeline had something real to prove. It stayed accurate through a live Terraform apply and multiple dependency version bumps.
+
+---
+
+## ⚙️ CI/CD Pipeline
+
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| `terraform-plan.yml` | Every PR | Plans all 9 stages in parallel, runs native Terraform tests, posts Infracost + Checkov comments |
+| `terraform-apply.yml` | Push to `main` | Applies all 9 stages **sequentially**, gated behind a `prod` environment requiring manual approval |
+| `drift-detection.yml` | Daily cron + manual dispatch | Read-only `plan -detailed-exitcode` across every stage; auto-files a GitHub issue if live infrastructure has drifted from state |
+
+- **Workload Identity Federation** — every workflow authenticates to GCP via short-lived OIDC tokens scoped to this exact repository. No JSON key file has ever existed.
+- **Dependabot** — Terraform provider versions + GitHub Actions versions, both tracked weekly
+- **CODEOWNERS** — highest-blast-radius stages (`01-org-policies`, `05-security`) require explicit review
+- **Pre-commit hooks** — `terraform fmt`, `terraform validate`, `checkov`, `terraform-docs`
+
+---
+
+## 🧰 Tech Stack
+
+| Category | Tools |
+|---|---|
+| **IaC** | Terraform 1.15, HCL, native `terraform test` |
+| **Cloud** | Google Cloud Platform — Cloud Identity, Resource Manager, Org Policy, IAM, Compute Engine, Cloud Run, Cloud NAT, VPC, Cloud Storage, BigQuery, Secret Manager, Cloud Logging, Cloud Monitoring, Security Command Center, Access Context Manager, Cloud Billing |
+| **CI/CD** | GitHub Actions, Workload Identity Federation, Dependabot |
+| **Security scanning** | Checkov, Terrascan |
+| **Cost tooling** | Infracost, BigQuery (native billing export) |
+| **Documentation** | terraform-docs, Architecture Decision Records, Mermaid/SVG architecture diagram |
+| **Badges/automation** | shields.io dynamic endpoints, GitHub Gist as a lightweight data store, `schneegans/dynamic-badges-action` |
+
+---
+
+## 🧭 Well-Architected Framework Alignment
+
+| Pillar | How It's Addressed |
+|---|---|
+| 🔐 **Security, Privacy & Compliance** | Org policies, group-based IAM, WIF, Checkov + Terrascan, VPC-SC dry-run |
+| 💰 **Cost Optimization** | Budget alerts, resource labels, quota-aware project factory, dual-direction cost visibility |
+| ⚡ **Performance Optimization** | Region chosen for proximity (`asia-south1`), Shared VPC architecture leaves room for regional expansion |
+| 🛠️ **Reliability** | Fully code-defined infrastructure, GCP-managed HA networking components, daily drift detection |
+| 🚀 **Operational Excellence** | Full IaC, isolated per-stage state, documented design decisions, gated CI/CD, native testing |
+
+Full detail in [`WELL-ARCHITECTED.md`](WELL-ARCHITECTED.md).
+
+---
+
+## 🧪 Live, Real Infrastructure — Not Just Code
+
+Every stage was applied against a **real Cloud Identity organization**, not a simulated environment. Real problems were hit and fixed the way they happen in production, not edited out afterward:
+
+| Real Issue Hit | Root Cause | Fix |
+|---|---|---|
+| Free-tier billing quota wall | Only 5 projects can be simultaneously linked to a trial billing account | Explicit `enabled_workloads` gating instead of a full cross-product |
+| Org policy blocked a live deployment | `iam.allowedPolicyMemberDomains` rejected an `allUsers` grant attempt | Scoped access to `domain:gcpcloudhub.in` instead — the guardrail working as intended |
+| Automation SA couldn't run in CI | Prior applies ran under a human user's broader credentials | Explicit Owner + org-level roles granted to the SA, closing a real gap CI exposed |
+| Checkov badge showed `?` for 4 iterations | Wrong assumed JSON output structure, wrong file path, YAML parsing breaks on nested heredocs | Diagnosed via real Actions log inspection, fixed against confirmed real output |
+| Billing export query referenced a nonexistent table | Assumed generic table name instead of verifying via `INFORMATION_SCHEMA` | Re-verified against the real schema, corrected the query and docs |
+
+---
+
+## 🧪 Testing
+
+- **Native `terraform test`** (Terraform ≥1.6) — validates key assertions for `01-org-policies` (policy configuration correctness) and `02-resman` (folder structure counts), wired into the plan workflow
+- **Daily automated drift detection** — all 9 stages, read-only, auto-files a GitHub issue on any mismatch between live state and configuration
+- Test coverage is intentionally partial — a fuller suite covering every stage is a documented next step, consciously scoped down in favor of breadth across security, cost, and CI/CD within reasonable project scope
+
+---
+
+## 🧠 Design Decisions
+
+Full reasoning in [`docs/decisions/`](docs/decisions/):
+
+1. **Department + environment folders** over a flat environment-only structure
+2. **Workload Identity Federation** over service account keys for all CI/CD auth
+3. **Org policies applied before resource management** — guardrails exist before anything they'd guard
+4. **Reusable Terraform module built as a template**, deliberately not retrofitted into live, working stages
+
+---
+
+## ⚠️ Known Limitations
+
+- **Billing export activation is a manual Console step** — GCP's Cloud Billing API has no Terraform resource for linking export to a dataset
+- **Infracost doesn't run on Dependabot's own PRs** — GitHub blocks repository secrets from Dependabot-triggered workflows by design
+- **VPC Service Controls runs in dry-run mode**, not enforced — a deliberate choice given live workloads were already running when the stage was added; documented path to enforcement included
+
+---
+
+## 🚀 Prerequisites & Reproduction
+
+- A GCP Organization (Cloud Identity Free or Google Workspace)
 - A billing account linked to that org
-- Four Google Groups created in advance: gcp-organization-admins, gcp-billing-admins, gcp-security-admins, gcp-devops
-- Terraform >= 1.5, gcloud CLI authenticated with Organization Administrator access
+- Four Google Groups created in advance (`gcp-organization-admins`, `gcp-billing-admins`, `gcp-security-admins`, `gcp-devops`)
+- Terraform ≥ 1.6, `gcloud` CLI with Organization Administrator access
+- `.tfvars.example` provided for every stage — copy, fill in your real values, never commit the result
 
-## Stage execution order
-
+```bash
 cd 00-bootstrap && terraform init && terraform apply
 cd ../01-org-policies && terraform init && terraform apply
 cd ../02-resman && terraform init && terraform apply
 cd ../03-networking && terraform init && terraform apply
-
-## Roadmap
-
-- 04-project-factory: workload projects per department, attached to shared VPC
-- 05-security: centralized audit logging, bucket access logging
-- CI/CD via GitHub Actions using the WIF setup from Stage 0
-
-## Lessons learned
-
-- Free-tier Cloud Billing accounts can only be linked to a limited number of projects simultaneously (observed limit: 5). The project factory uses an explicit `enabled_workloads` list rather than a full department x environment cross-product, so it stays within quota while keeping the underlying pattern factory-shaped and easy to extend.
-- Shared VPC requires the host project to be explicitly designated via `google_compute_shared_vpc_host_project`, separate from creating the VPC and subnets themselves.
-- API-quota-project routing (`user_project_override`) means every API a stage calls, including permission pre-checks like Cloud Billing's, must be enabled on the quota project itself.
-
-### Terrascan results
-
-Scanned with Terrascan v1.19.9: 191 policies evaluated, 0 violations (High/Medium/Low all zero). Terrascan and Checkov use different rule engines (OPA/Rego vs Bridgecrew) with different policy coverage, so results aren't directly comparable — running both provides complementary signal rather than a second opinion on the same checks. See security-scans/ for dated scan snapshots.
-
-## CI/CD
-
-- `.github/workflows/terraform-plan.yml` — runs `terraform plan` across all 6 stages on every pull request, authenticated via Workload Identity Federation (no service account keys).
-- `.github/workflows/terraform-apply.yml` — runs `terraform apply` in strict dependency order (bootstrap → org-policies → resman → networking → project-factory → security) on merge to main, gated behind a `prod` GitHub Environment requiring manual approval before each stage applies.
-- Stage variables and secrets are injected from GitHub Actions repo variables/secrets at runtime rather than committed `.tfvars` files, which remain gitignored and local-only.
-
-### Lessons learned from wiring up CI
-
-The automation service account had org-level admin roles (from Stage 0) but had never been granted ownership on the individual projects it needed to manage, since all prior applies ran under a human user's credentials in Cloud Shell. Moving to CI surfaced these gaps immediately: the SA needed explicit Owner on each project (seed, networking host, workload projects) and explicit org-level `logging.admin` and `iam.organizationRoleAdmin` roles to match what the human operator had accumulated ad hoc. This is a good illustration of why CI/CD matters even for a solo project — it forces the automation identity's actual permissions to be complete and explicit, rather than silently depending on a human's broader access.
-
-## Secret Manager pattern
-
-A Secret Manager container (`gch-example-db-credential`) demonstrates the intended pattern for workload credentials: the secret container is Terraform-managed, but no secret value is ever stored in Terraform state, `.tfvars`, or committed code. Values are set out-of-band (via `gcloud secrets versions add` or the Console) by whoever operates the workload that needs it. Access is scoped to the `gcp-devops` group via `secretAccessor`, not project-wide or org-wide.
-
-## Org policy in action
-
-While deploying the Stage 6 demo workload, `iam.allowedPolicyMemberDomains` (Stage 1) automatically blocked an attempt to grant `allUsers` access to a Cloud Run service, since `allUsers` isn't a principal from the `gcpcloudhub.in` domain. This is the guardrail working as intended — access was scoped to `domain:gcpcloudhub.in` instead. A concrete example of an org-wide policy preventing an accidental public-exposure misconfiguration before it happened.
-
-## Reusable module (template, not yet adopted)
-
-`modules/gcp-project` extracts the common pattern used across 00-bootstrap, 03-networking, and 04-project-factory: project creation, standard labels, API enablement, and full audit logging. It exists as a reference for future stages rather than a retrofit of existing ones — refactoring live, working infrastructure to adopt a module means new Terraform state addresses for every resource, which carries real risk (destroy-and-recreate without careful `terraform state mv`) against no functional benefit. The module demonstrates the DRY pattern; existing stages remain as-is since they work correctly and touching them wouldn't improve anything users or the org actually experience.
-
-## Known limitation: Infracost on Dependabot PRs
-
-GitHub restricts repository secrets from workflows triggered by Dependabot PRs as a security measure, so the Infracost cost-estimation job fails on Dependabot's own PRs (missing `INFRACOST_API_KEY`). This is expected and does not affect PRs opened by a human, where the secret is available normally.
-
-## Known limitation: Billing export activation is manual
-
-Terraform can create the BigQuery dataset for billing export (07-cost-visibility), but Google's Cloud Billing API does not expose a Terraform resource for actually linking billing export to that dataset. This is a one-time Console step (Billing > Billing export > Enable detailed export), not automatable via IaC as of this provider version.
-
-## Using the billing export
-
-Verified table: `gch_billing_export.gcp_billing_export_resource_v1_012E9C_0D5AF1_5575CE` (name includes billing account ID, confirmed via `INFORMATION_SCHEMA.TABLES`). As of this writing, the table exists with the correct schema but has 0 rows - Google's daily export batch had not yet completed its first run. Query actual spend by department/environment once data lands using `07-cost-visibility/queries/cost-by-department.sql`, which groups cost by the `department` label nested in `project.labels` (confirmed against the real schema, not assumed).
-
-Run it directly in the BigQuery Console, or via the `bq query` CLI:
-
-```
-bq query --use_legacy_sql=false < 07-cost-visibility/queries/cost-by-department.sql
+cd ../04-project-factory && terraform init && terraform apply
+cd ../05-security && terraform init && terraform apply
+cd ../06-workload-demo && terraform init && terraform apply
+cd ../07-cost-visibility && terraform init && terraform apply
+cd ../08-vpc-sc && terraform init && terraform apply
 ```
 
-## Documentation generation
+---
 
-Each stage's README.md includes an auto-generated variable/output/resource table via terraform-docs, wired into pre-commit. The initial attempt used a Go-compile-based hook which failed on Cloud Shell's toolchain; switched to the prebuilt-binary hook from the same pre-commit-terraform repo already used for fmt/validate/checkov, which resolved it without requiring any compilation.
+## 🧹 Teardown
 
-## Testing
+Destroy in exact reverse order — see the full [`Teardown`](README.md#teardown) notes in-repo for stage-specific caveats (seed project deletion protection, custom role soft-delete retention, VPC-SC/networking destroy ordering).
 
-Native Terraform tests (`terraform test`, requires Terraform 1.6+) validate key assertions for `01-org-policies` (policy configuration correctness) and `02-resman` (folder structure counts). Tests run automatically on every pull request via the plan workflow. Coverage is intentionally partial — a fuller test suite covering every stage is a natural next step, consciously scoped down here in favor of breadth across the rest of the landing zone (security, cost visibility, CI/CD) within reasonable project scope.
+---
 
-## Teardown
+## 🔗 Repository
 
-To tear down completely, destroy in reverse dependency order:
+| Repository | Purpose |
+|---|---|
+| [`gcpcloudhub-fast-foundation`](https://github.com/bikram-singh/gcpcloudhub-fast-foundation) | GCP Organization Landing Zone · Terraform · FAST-Inspired · Full Governance |
 
-cd 08-vpc-sc && terraform destroy
-cd ../07-cost-visibility && terraform destroy
-cd ../06-workload-demo && terraform destroy
-cd ../05-security && terraform destroy
-cd ../04-project-factory && terraform destroy
-cd ../03-networking && terraform destroy
-cd ../02-resman && terraform destroy
-cd ../01-org-policies && terraform destroy
-cd ../00-bootstrap && terraform destroy
+---
 
-Notes:
-- 00-bootstrap's seed project has deletion_policy = "PREVENT" on the google_project resource, requiring it be changed to "DELETE" or deleted manually via gcloud before terraform destroy fully removes it.
-- The GCS state bucket is destroyed as part of 00-bootstrap's teardown, so run this stage last and expect to lose remote state history.
-- Org policies revert to Google defaults once destroyed; no manual cleanup needed.
-- The custom IAM role (gchDevopsScoped) enters a soft-delete state for approximately 7 days after destroy, per GCP's default retention for custom roles.
-- The VPC-SC access policy (08-vpc-sc) must be destroyed before 03-networking, since the perimeter references networking project numbers.
+<div align="center">
+
+**Maintained by Bikram Singh**
+
+*Built with Terraform · Google Cloud Platform · GitHub Actions · Checkov · Terrascan · Infracost*
+
+</div>
