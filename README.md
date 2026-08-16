@@ -86,23 +86,31 @@ It isn't a tutorial repo or a copy of Google's own FAST reference — it's a wor
 
 ```
                     Organization: gcpcloudhub.in
+                    (01-org-policies: 6 guardrails, org-wide)
                                 │
         ┌───────────┬───────────┼───────────┬───────────┐
         ▼           ▼           ▼           ▼           ▼
        HR        Finance        IT        Sales         AI
    Prod/NonProd  Prod/NonProd  Prod/NonProd Prod/NonProd Prod/NonProd
+        (02-resman: folders, group IAM, gchDevopsScoped role)
                                 │
                                 ▼
-                        Shared VPC (03)
-                   gch-net-host · Cloud NAT
+                    Shared VPC (03-networking)
+              gch-net-host · Cloud NAT · Flow Logs
                                 │
               ┌─────────────────┼─────────────────┐
               ▼                 ▼                 ▼
         gch-hr-prod       gch-hr-nonprod    gch-sales-nonprod
       (04-project-factory, attached as Shared VPC service projects)
-              │
-              ▼
+                                │
+                                ▼
    06-workload-demo: live Cloud Run + hardened e2-micro VM
+
+   Cross-cutting layers (apply across everything above):
+   00-bootstrap        seed project, state bucket, WIF, automation SA
+   05-security          audit log sink, Secret Manager, IAM alerting
+   07-cost-visibility   BigQuery billing export, cost-by-department query
+   08-vpc-sc            Access Context Manager perimeter (dry-run mode)
 ```
 
 ### 🔄 Stage Dependency Chain
