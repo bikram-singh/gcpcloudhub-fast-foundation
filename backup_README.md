@@ -8,6 +8,7 @@
 [![GCP Billed Cost](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-billed-cost-badge.json)](https://console.cloud.google.com/billing)
 [![Checkov Scan](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-checkov-badge.json)](https://www.checkov.io)
 
+
 [![Terraform](https://img.shields.io/badge/Terraform-1.15-844FBA?logo=terraform&logoColor=white)](https://www.terraform.io)
 [![Google Cloud](https://img.shields.io/badge/Google_Cloud-9_Stages-4285F4?logo=googlecloud&logoColor=white)](https://cloud.google.com)
 [![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/features/actions)
@@ -29,9 +30,8 @@
 - [The Nine Stages](#-the-nine-stages)
 - [Security & Compliance](#-security--compliance)
 - [Cost Visibility — Both Directions](#-cost-visibility--both-directions)
-- [Recovery & State Safety](#-recovery--state-safety)
 - [CI/CD Pipeline](#-cicd-pipeline)
-- [Complete Tech & Tool Inventory](#-complete-tech--tool-inventory)
+- [Tech Stack](#-tech-stack)
 - [Well-Architected Framework Alignment](#-well-architected-framework-alignment)
 - [Live, Real Infrastructure — Not Just Code](#-live-real-infrastructure--not-just-code)
 - [Testing](#-testing)
@@ -149,48 +149,25 @@ Each stage is its own Terraform root module with isolated state (same GCS bucket
 | 📜 **Audit logging** | Full Admin Read / Data Read / Data Write logging explicitly enabled on every project, feeding a centralized org-wide sink |
 | 🚧 **VPC Service Controls** | Real perimeter, dry-run mode, safe rollout pattern documented |
 | 📄 **4 Architecture Decision Records** | Department+env folders, WIF over SA keys, org-policies-before-resman sequencing, module-as-template (not retrofit) |
-| 🔔 **IAM change alerting** | Log-based metric + Cloud Monitoring alert policy — emails on any `SetIamPolicy` call org-wide |
 
 ---
 
 ## 💰 Cost Visibility — Both Directions
 
-Three live badges cover cost and security together, all auto-updating via CI:
-
-| Badge | Source | What It Shows |
-|---|---|---|
-| **Infracost Estimate** | Infracost, run against Terraform plans | Predicted monthly cost from code, before anything is deployed |
-| **GCP Billed Cost** | Native BigQuery billing export, queried live via `bq` in CI | Real, actual spend from Google's own billing data — currently shows "pending data..." until Google's first daily export batch completes (export enabled, table schema verified correct, just waiting on Google's timing, not a bug) |
-| **Checkov Scan** | Checkov, run against all Terraform code | Current pass count across the whole repo |
+Most projects show cost estimation *or* actual billing. This one does both, deliberately.
 
 ### Predicted (before deployment) — Infracost
 - Runs on every human-opened PR via `terraform-plan.yml`, posts a real cost-delta comment
 - Full dashboard at `dashboard.infracost.io/org/gcpcloudhub`
-- Live-updating badge, pulled from a Gist that CI refreshes after every merge to `main`
+- **Live-updating README badge** — pulled from a Gist that CI refreshes after every merge to `main`
 
 ### Actual (after deployment) — Google-native billing export
 - `07-cost-visibility`: Terraform-managed BigQuery dataset, real detailed-usage-cost export enabled
 - A starter SQL query groups real spend by the `department` label applied to every project
-- Configuration independently re-verified against the actual BigQuery schema (`project.labels`, not an assumed field name) after an initial query was found to be wrong — the table name itself (`gcp_billing_export_resource_v1_<billing_account_id>`) also had to be corrected against `INFORMATION_SCHEMA.TABLES`, not assumed
-- A dedicated CI job queries this table directly via the `bq` CLI (installed via `google-github-actions/setup-gcloud`) and updates the third badge automatically
+- Configuration independently re-verified against the actual BigQuery schema (`project.labels`, not an assumed field name) after an initial query was found to be wrong
 
 ### What makes the $ figure real, not theoretical
-The Infracost badge shows an actual, non-zero dollar amount because `06-workload-demo`'s e2-micro VM was deliberately added, priced correctly for `asia-south1` (outside GCP's Always-Free region list), specifically so the cost pipeline had something real to prove. It stayed accurate through a live Terraform apply and multiple dependency version bumps.
-
----
-
-## 🛟 Recovery & State Safety
-
-| Mechanism | Purpose |
-|---|---|
-| **Versioned state bucket** | `00-bootstrap`'s GCS state bucket has object versioning enabled — any state file can be rolled back to a prior version if corrupted |
-| **State bucket lifecycle rules** | Keeps the 10 most recent state versions, deletes archived versions after 30 days — bounded storage growth without losing meaningful history |
-| **Per-stage state isolation** | Each of the 9 stages has its own state file (same bucket, different prefix) — a corrupted or locked state in one stage cannot affect another |
-| **`deletion_policy = "PREVENT"`** | The seed project (`00-bootstrap`) cannot be accidentally destroyed via `terraform destroy` without an explicit policy change first |
-| **Daily drift detection** | Catches divergence between live infrastructure and Terraform state before it becomes a real incident |
-| **Custom role soft-delete** | The `gchDevopsScoped` IAM role enters GCP's standard ~7-day soft-delete retention after removal — accidental deletion is recoverable within that window |
-| **Documented teardown order** | Full reverse-dependency destroy sequence documented (see [Teardown](#-teardown)) so recovery from "tear it all down and start over" is a known, tested procedure, not a guess |
-| **Org policy defaults on destroy** | Org policies revert cleanly to Google's platform defaults if `01-org-policies` is ever destroyed — no orphaned custom state to clean up manually |
+The live badge shows an actual, non-zero dollar amount — because `06-workload-demo`'s e2-micro VM was deliberately added, priced correctly for `asia-south1` (outside GCP's free-tier region list), specifically so the cost pipeline had something real to prove. It stayed accurate through a live Terraform apply and multiple dependency version bumps.
 
 ---
 
@@ -199,89 +176,27 @@ The Infracost badge shows an actual, non-zero dollar amount because `06-workload
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | `terraform-plan.yml` | Every PR | Plans all 9 stages in parallel, runs native Terraform tests, posts Infracost + Checkov comments |
-| `terraform-apply.yml` | Push to `main` | Applies all 9 stages **sequentially**, gated behind a `prod` environment requiring manual approval, then updates all 3 live badges |
+| `terraform-apply.yml` | Push to `main` | Applies all 9 stages **sequentially**, gated behind a `prod` environment requiring manual approval |
 | `drift-detection.yml` | Daily cron + manual dispatch | Read-only `plan -detailed-exitcode` across every stage; auto-files a GitHub issue if live infrastructure has drifted from state |
 
 - **Workload Identity Federation** — every workflow authenticates to GCP via short-lived OIDC tokens scoped to this exact repository. No JSON key file has ever existed.
-- **Dependabot** — Terraform provider versions + GitHub Actions versions, both tracked weekly; 10 dependency PRs merged and verified safe across two rounds
+- **Dependabot** — Terraform provider versions + GitHub Actions versions, both tracked weekly
 - **CODEOWNERS** — highest-blast-radius stages (`01-org-policies`, `05-security`) require explicit review
-- **Pre-commit hooks** — `terraform_fmt`, `terraform_validate`, `checkov` (with a documented 5-check skip-list), `terraform_docs`
+- **Pre-commit hooks** — `terraform fmt`, `terraform validate`, `checkov`, `terraform-docs`
 
 ---
 
-## 🧰 Complete Tech & Tool Inventory
+## 🧰 Tech Stack
 
-Every tool and technology used anywhere in this project.
-
-### Core IaC
-| Tool | Purpose |
+| Category | Tools |
 |---|---|
-| Terraform 1.15 | Primary IaC engine for all 9 stages |
-| HCL | Terraform's native configuration language |
-| `terraform test` | Native testing framework (Terraform ≥1.6) |
-| `terraform fmt` / `terraform validate` | Formatting and syntax validation, pre-commit and CI |
-
-### Google Cloud Services
-| Service | Used For |
-|---|---|
-| Cloud Identity | Organization identity backbone |
-| Resource Manager | Org, folder, and project hierarchy |
-| Organization Policy Service | 6 org-wide guardrails |
-| IAM (incl. Workload Identity Federation) | All access control and CI/CD auth |
-| Compute Engine | Shared VPC, subnets, Cloud NAT, firewall rules, the demo VM |
-| Cloud Run | The live demo web service |
-| Cloud Storage (GCS) | Terraform state bucket |
-| BigQuery | Billing export dataset and queries |
-| Secret Manager | Secret container pattern |
-| Cloud Logging | Audit log sink, log-based metrics |
-| Cloud Monitoring | Alert policies, notification channels |
-| Security Command Center | Org-level security posture dashboard |
-| Access Context Manager / VPC Service Controls | Stage 08 perimeter |
-| Cloud Billing (incl. Budgets & native BigQuery export) | Budget alerts, actual-spend data |
-| Cloud Identity Groups (Google Groups) | All IAM bindings — zero individual-user grants |
-
-### Security & Compliance Scanning
-| Tool | Purpose |
-|---|---|
-| Checkov | Primary static analysis scanner, pre-commit + CI |
-| Terrascan | Secondary, independent OPA/Rego-based scanner |
-
-### Cost Tooling
-| Tool | Purpose |
-|---|---|
-| Infracost | Predicted cost estimation from Terraform plans |
-| `bq` CLI (Cloud SDK) | Queries real billing data directly in CI |
-| Google-native BigQuery billing export | Source of truth for actual spend |
-
-### CI/CD & Automation
-| Tool / Action | Purpose |
-|---|---|
-| GitHub Actions | All CI/CD orchestration |
-| `google-github-actions/auth` | WIF-based GCP authentication in CI |
-| `google-github-actions/setup-gcloud` | Installs `gcloud`/`bq` CLI in CI runners |
-| `hashicorp/setup-terraform` | Installs Terraform in CI runners |
-| `actions/checkout` | Repo checkout in every job |
-| `actions/github-script` | Programmatic GitHub API calls (drift-detection issue filing) |
-| `schneegans/dynamic-badges-action` | Pushes live badge data to the Gist |
-| Dependabot | Automated dependency version PRs (Terraform providers + GitHub Actions) |
-| Pre-commit framework | Local hook orchestration (`fmt`, `validate`, `checkov`, `terraform-docs`) |
-
-### Documentation & Reporting
-| Tool | Purpose |
-|---|---|
-| terraform-docs (prebuilt binary, v0.19.0) | Auto-generates variable/output/resource tables per stage |
-| Architecture Decision Records (custom format) | 4 formal design-decision documents |
-| shields.io | Renders all dynamic badges |
-| GitHub Gist | Lightweight JSON data store feeding the 3 live badges |
-
-### Languages & Scripting
-| Language | Where Used |
-|---|---|
-| Python 3 | Badge JSON parsing/generation in CI, one-off README/config editing scripts during development |
-| Bash | All CI shell steps, `bq` queries, `gcloud` commands |
-| SQL | The BigQuery cost-by-department starter query |
-| YAML | All GitHub Actions workflow definitions |
-| Markdown | All documentation |
+| **IaC** | Terraform 1.15, HCL, native `terraform test` |
+| **Cloud** | Google Cloud Platform — Cloud Identity, Resource Manager, Org Policy, IAM, Compute Engine, Cloud Run, Cloud NAT, VPC, Cloud Storage, BigQuery, Secret Manager, Cloud Logging, Cloud Monitoring, Security Command Center, Access Context Manager, Cloud Billing |
+| **CI/CD** | GitHub Actions, Workload Identity Federation, Dependabot |
+| **Security scanning** | Checkov, Terrascan |
+| **Cost tooling** | Infracost, BigQuery (native billing export) |
+| **Documentation** | terraform-docs, Architecture Decision Records, Mermaid/SVG architecture diagram |
+| **Badges/automation** | shields.io dynamic endpoints, GitHub Gist as a lightweight data store, `schneegans/dynamic-badges-action` |
 
 ---
 
@@ -295,7 +210,7 @@ Every tool and technology used anywhere in this project.
 | 🛠️ **Reliability** | Fully code-defined infrastructure, GCP-managed HA networking components, daily drift detection |
 | 🚀 **Operational Excellence** | Full IaC, isolated per-stage state, documented design decisions, gated CI/CD, native testing |
 
-Full detail, including a per-pillar evidence table and a summary confidence rating, in [`WELL-ARCHITECTED.md`](WELL-ARCHITECTED.md).
+Full detail in [`WELL-ARCHITECTED.md`](WELL-ARCHITECTED.md).
 
 ---
 
@@ -310,8 +225,6 @@ Every stage was applied against a **real Cloud Identity organization**, not a si
 | Automation SA couldn't run in CI | Prior applies ran under a human user's broader credentials | Explicit Owner + org-level roles granted to the SA, closing a real gap CI exposed |
 | Checkov badge showed `?` for 4 iterations | Wrong assumed JSON output structure, wrong file path, YAML parsing breaks on nested heredocs | Diagnosed via real Actions log inspection, fixed against confirmed real output |
 | Billing export query referenced a nonexistent table | Assumed generic table name instead of verifying via `INFORMATION_SCHEMA` | Re-verified against the real schema, corrected the query and docs |
-| YAML syntax broke mid-edit | A nested Python heredoc inside a workflow `run:` block violated YAML block-scalar indentation rules | Collapsed to a single-line command; validated with `yaml.safe_load()` before every subsequent commit |
-| Transient state-lock contention | Multiple CI runs (own pushes + Dependabot PRs) hit the same stage's GCS state lock simultaneously | Confirmed as transient via `terraform plan`; adopted a "merge Dependabot PRs one at a time" practice |
 
 ---
 
@@ -339,8 +252,6 @@ Full reasoning in [`docs/decisions/`](docs/decisions/):
 - **Billing export activation is a manual Console step** — GCP's Cloud Billing API has no Terraform resource for linking export to a dataset
 - **Infracost doesn't run on Dependabot's own PRs** — GitHub blocks repository secrets from Dependabot-triggered workflows by design
 - **VPC Service Controls runs in dry-run mode**, not enforced — a deliberate choice given live workloads were already running when the stage was added; documented path to enforcement included
-- **GCP Billed Cost badge shows "pending data..."** until Google's billing export completes its first daily batch — configuration independently verified correct, purely a timing dependency outside this project's control
-- **This repository is unlicensed** (no LICENSE file) — a deliberate choice; by default this means all rights reserved, so the code is viewable but not formally licensed for reuse
 
 ---
 
@@ -368,26 +279,7 @@ cd ../08-vpc-sc && terraform init && terraform apply
 
 ## 🧹 Teardown
 
-Destroy in exact reverse order:
-
-```bash
-cd 08-vpc-sc && terraform destroy
-cd ../07-cost-visibility && terraform destroy
-cd ../06-workload-demo && terraform destroy
-cd ../05-security && terraform destroy
-cd ../04-project-factory && terraform destroy
-cd ../03-networking && terraform destroy
-cd ../02-resman && terraform destroy
-cd ../01-org-policies && terraform destroy
-cd ../00-bootstrap && terraform destroy
-```
-
-Notes:
-- `00-bootstrap`'s seed project has `deletion_policy = "PREVENT"` — change to `"DELETE"` or delete manually via `gcloud` before `terraform destroy` will fully remove it
-- The GCS state bucket is destroyed as part of `00-bootstrap`'s teardown — run this stage last, and expect to lose remote state history
-- Org policies revert to Google defaults automatically; no manual cleanup needed
-- The custom IAM role (`gchDevopsScoped`) enters ~7 days of soft-delete retention after destroy
-- `08-vpc-sc`'s access policy must be destroyed before `03-networking`, since the perimeter references networking project numbers
+Destroy in exact reverse order — see the full [`Teardown`](README.md#teardown) notes in-repo for stage-specific caveats (seed project deletion protection, custom role soft-delete retention, VPC-SC/networking destroy ordering).
 
 ---
 
