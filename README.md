@@ -111,10 +111,13 @@ Terraform can create the BigQuery dataset for billing export (07-cost-visibility
 
 ## Using the billing export
 
-Once daily billing data lands in `gch_billing_export` (starts the day after export was enabled), query actual spend by department/environment using `07-cost-visibility/queries/cost-by-department.sql` in BigQuery. This groups cost by the `department` label applied to every project in 04-project-factory, giving a real per-team cost breakdown rather than just a repo-wide total.
+Verified table: `gch_billing_export.gcp_billing_export_resource_v1_012E9C_0D5AF1_5575CE` (name includes billing account ID, confirmed via `INFORMATION_SCHEMA.TABLES`). As of this writing, the table exists with the correct schema but has 0 rows - Google's daily export batch had not yet completed its first run. Query actual spend by department/environment once data lands using `07-cost-visibility/queries/cost-by-department.sql`, which groups cost by the `department` label nested in `project.labels` (confirmed against the real schema, not assumed).
 
-Run it directly in the BigQuery Console, or via `bq query` CLI:
+Run it directly in the BigQuery Console, or via the `bq query` CLI:
+
+```
 bq query --use_legacy_sql=false < 07-cost-visibility/queries/cost-by-department.sql
+```
 
 ## Documentation generation
 
