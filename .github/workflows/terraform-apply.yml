@@ -245,7 +245,7 @@ jobs:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 5e15a2c50f65a4436ed0b99c1e673ae7
           filename: gcpcloudhub-cost-badge.json
-          label: monthly cost
+          label: infracost estimate
           message: $${{ steps.cost.outputs.amount }}
           color: green
 
@@ -273,6 +273,38 @@ jobs:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 5e15a2c50f65a4436ed0b99c1e673ae7
           filename: gcpcloudhub-checkov-badge.json
-          label: checkov
+          label: checkov scan
           message: ${{ steps.count.outputs.passed }} passed
           color: green
+
+  update-billed-cost-badge:
+    needs: apply-workload-demo
+    runs-on: ubuntu-latest
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Query real billed cost
+        id: cost
+        run: |
+          ROWS=$(bq query --use_legacy_sql=false --format=csv \
+            "SELECT COUNT(*) FROM \`gch-seed-28bdf9.gch_billing_export.gcp_billing_export_resource_v1_012E9C_0D5AF1_5575CE\`" | tail -1)
+          if [ "$ROWS" = "0" ]; then
+            echo "amount=pending data" >> "$GITHUB_OUTPUT"
+          else
+            TOTAL=$(bq query --use_legacy_sql=false --format=csv \
+              "SELECT ROUND(SUM(cost), 2) FROM \`gch-seed-28bdf9.gch_billing_export.gcp_billing_export_resource_v1_012E9C_0D5AF1_5575CE\` WHERE usage_start_time >= TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MONTH)" | tail -1)
+            echo "amount=\$$TOTAL" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Update billed cost badge gist
+        uses: schneegans/dynamic-badges-action@v1.9.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 5e15a2c50f65a4436ed0b99c1e673ae7
+          filename: gcpcloudhub-billed-cost-badge.json
+          label: gcp billed cost
+          message: ${{ steps.cost.outputs.amount }}
+          color: blue
