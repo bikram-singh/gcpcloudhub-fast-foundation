@@ -23,6 +23,8 @@ jobs:
           - 04-project-factory
           - 05-security
           - 06-workload-demo
+          - 07-cost-visibility
+          - 08-vpc-sc
     steps:
       - uses: actions/checkout@v7
 
@@ -113,6 +115,21 @@ jobs:
               cat > terraform.tfvars << EOF
           prefix       = "$PREFIX"
           region       = "$REGION"
+          state_bucket = "$STATE_BUCKET"
+          EOF
+              ;;
+            07-cost-visibility)
+              cat > terraform.tfvars << EOF
+          prefix              = "$PREFIX"
+          region              = "$REGION"
+          seed_project_id     = "$SEED_PROJECT_ID"
+          billing_account_id  = "$BILLING_ACCOUNT_ID"
+          EOF
+              ;;
+            08-vpc-sc)
+              cat > terraform.tfvars << EOF
+          org_id       = "$ORG_ID"
+          prefix       = "$PREFIX"
           state_bucket = "$STATE_BUCKET"
           EOF
               ;;
