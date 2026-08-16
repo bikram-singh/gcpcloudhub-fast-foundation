@@ -82,6 +82,8 @@ It isn't a tutorial repo or a copy of Google's own FAST reference — it's a wor
 
 ![Landing zone architecture](docs/architecture.svg)
 
+![Complete architecture with full tech stack](docs/architecture-full.svg)
+
 ```
                     Organization: gcpcloudhub.in
                                 │

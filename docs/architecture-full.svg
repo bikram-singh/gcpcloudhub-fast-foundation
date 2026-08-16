@@ -1,0 +1,150 @@
+<svg width="900" height="1180" viewBox="0 0 900 1180" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>gcpcloudhub-fast-foundation complete architecture and tech stack</title>
+<desc>Organization with department folders, shared VPC, workload projects, and full tooling stack across CI/CD, security, cost, and documentation.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<text x="30" y="30" font-family="sans-serif" font-size="16" font-weight="600" fill="#26215C">gcpcloudhub-fast-foundation — complete architecture</text>
+
+<!-- Org container -->
+<rect x="20" y="50" width="860" height="120" rx="16" fill="none" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="4 4"/>
+<text x="34" y="68" font-family="sans-serif" font-size="12" fill="#5F5E5A">gcpcloudhub.in — organization</text>
+
+<g fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5">
+<rect x="40" y="80" width="150" height="70" rx="8"/>
+<rect x="205" y="80" width="150" height="70" rx="8"/>
+<rect x="370" y="80" width="150" height="70" rx="8"/>
+<rect x="535" y="80" width="150" height="70" rx="8"/>
+<rect x="700" y="80" width="150" height="70" rx="8"/>
+</g>
+<g font-family="sans-serif" font-size="14" font-weight="600" fill="#26215C" text-anchor="middle">
+<text x="115" y="112">HR</text>
+<text x="280" y="112">Finance</text>
+<text x="445" y="112">IT</text>
+<text x="610" y="112">Sales</text>
+<text x="775" y="112">AI</text>
+</g>
+<g font-family="sans-serif" font-size="11" fill="#534AB7" text-anchor="middle">
+<text x="115" y="134">01-org-policies</text>
+<text x="280" y="134">02-resman</text>
+<text x="445" y="134">Prod / NonProd</text>
+<text x="610" y="134">Prod / NonProd</text>
+<text x="775" y="134">Prod / NonProd</text>
+</g>
+
+<line x1="445" y1="170" x2="445" y2="215" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- Shared VPC -->
+<rect x="335" y="217" width="220" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="445" y="240" font-family="sans-serif" font-size="14" font-weight="600" fill="#04342C" text-anchor="middle">03-networking</text>
+<text x="445" y="258" font-family="sans-serif" font-size="11" fill="#0F6E56" text-anchor="middle">Shared VPC, Cloud NAT</text>
+
+<line x1="445" y1="277" x2="230" y2="315" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="445" y1="277" x2="445" y2="315" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="445" y1="277" x2="660" y2="315" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- Workload projects -->
+<g fill="#FAECE7" stroke="#993C1D" stroke-width="0.5">
+<rect x="140" y="317" width="180" height="56" rx="8"/>
+<rect x="355" y="317" width="180" height="56" rx="8"/>
+<rect x="570" y="317" width="180" height="56" rx="8"/>
+</g>
+<g font-family="sans-serif" font-size="13" font-weight="600" fill="#4A1B0C" text-anchor="middle">
+<text x="230" y="341">gch-hr-prod</text>
+<text x="445" y="341">gch-hr-nonprod</text>
+<text x="660" y="341">gch-sales-nonprod</text>
+</g>
+<text x="445" y="358" font-family="sans-serif" font-size="11" fill="#993C1D" text-anchor="middle">04-project-factory</text>
+
+<line x1="445" y1="373" x2="445" y2="410" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- 06 workload demo -->
+<rect x="290" y="412" width="310" height="56" rx="8" fill="#FBEAF0" stroke="#993556" stroke-width="0.5"/>
+<text x="445" y="435" font-family="sans-serif" font-size="13" font-weight="600" fill="#4B1528" text-anchor="middle">06-workload-demo</text>
+<text x="445" y="453" font-family="sans-serif" font-size="11" fill="#993556" text-anchor="middle">Cloud Run + hardened e2-micro VM</text>
+
+<!-- Divider -->
+<line x1="20" y1="500" x2="880" y2="500" stroke="#D3D1C7" stroke-width="1"/>
+<text x="30" y="530" font-family="sans-serif" font-size="16" font-weight="600" fill="#26215C">Governance &amp; tooling stack</text>
+
+<!-- 01 org policies -->
+<rect x="30" y="550" width="270" height="80" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="165" y="573" font-family="sans-serif" font-size="13" font-weight="600" fill="#26215C" text-anchor="middle">01-org-policies</text>
+<text x="165" y="592" font-family="sans-serif" font-size="10.5" fill="#3C3489" text-anchor="middle">6 org-wide guardrails</text>
+<text x="165" y="608" font-family="sans-serif" font-size="10.5" fill="#3C3489" text-anchor="middle">no keys, no public access</text>
+<text x="165" y="622" font-family="sans-serif" font-size="10.5" fill="#3C3489" text-anchor="middle">domain-restricted IAM</text>
+
+<!-- 05 security -->
+<rect x="315" y="550" width="270" height="80" rx="10" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="450" y="573" font-family="sans-serif" font-size="13" font-weight="600" fill="#4A1B0C" text-anchor="middle">05-security</text>
+<text x="450" y="592" font-family="sans-serif" font-size="10.5" fill="#712B13" text-anchor="middle">Audit log sink</text>
+<text x="450" y="608" font-family="sans-serif" font-size="10.5" fill="#712B13" text-anchor="middle">Secret Manager, IAM alerts</text>
+<text x="450" y="622" font-family="sans-serif" font-size="10.5" fill="#712B13" text-anchor="middle">gchDevopsScoped custom role</text>
+
+<!-- 08 vpc-sc -->
+<rect x="600" y="550" width="270" height="80" rx="10" fill="#FBEAF0" stroke="#993556" stroke-width="0.5"/>
+<text x="735" y="573" font-family="sans-serif" font-size="13" font-weight="600" fill="#4B1528" text-anchor="middle">08-vpc-sc</text>
+<text x="735" y="592" font-family="sans-serif" font-size="10.5" fill="#72243E" text-anchor="middle">Access Context Manager</text>
+<text x="735" y="608" font-family="sans-serif" font-size="10.5" fill="#72243E" text-anchor="middle">Service perimeter</text>
+<text x="735" y="622" font-family="sans-serif" font-size="10.5" fill="#72243E" text-anchor="middle">dry-run mode</text>
+
+<!-- Security scanning -->
+<rect x="30" y="646" width="270" height="80" rx="10" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="165" y="669" font-family="sans-serif" font-size="13" font-weight="600" fill="#2C2C2A" text-anchor="middle">Security scanning</text>
+<text x="165" y="688" font-family="sans-serif" font-size="10.5" fill="#444441" text-anchor="middle">Checkov — 78 passed / 5 accepted</text>
+<text x="165" y="704" font-family="sans-serif" font-size="10.5" fill="#444441" text-anchor="middle">Terrascan — 191 policies, 0 violations</text>
+<text x="165" y="718" font-family="sans-serif" font-size="10.5" fill="#444441" text-anchor="middle">Security Command Center</text>
+
+<!-- Cost visibility -->
+<rect x="315" y="646" width="270" height="80" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="450" y="669" font-family="sans-serif" font-size="13" font-weight="600" fill="#04342C" text-anchor="middle">07-cost-visibility</text>
+<text x="450" y="688" font-family="sans-serif" font-size="10.5" fill="#085041" text-anchor="middle">Infracost — predicted cost</text>
+<text x="450" y="704" font-family="sans-serif" font-size="10.5" fill="#085041" text-anchor="middle">BigQuery native billing export</text>
+<text x="450" y="718" font-family="sans-serif" font-size="10.5" fill="#085041" text-anchor="middle">Budget alerts, cost labels</text>
+
+<!-- 00 bootstrap / CI/CD -->
+<rect x="600" y="646" width="270" height="80" rx="10" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="735" y="669" font-family="sans-serif" font-size="13" font-weight="600" fill="#2C2C2A" text-anchor="middle">00-bootstrap + CI/CD</text>
+<text x="735" y="688" font-family="sans-serif" font-size="10.5" fill="#444441" text-anchor="middle">Workload Identity Federation</text>
+<text x="735" y="704" font-family="sans-serif" font-size="10.5" fill="#444441" text-anchor="middle">GitHub Actions, Dependabot</text>
+<text x="735" y="718" font-family="sans-serif" font-size="10.5" fill="#444441" text-anchor="middle">Pre-commit + terraform-docs</text>
+
+<!-- Divider -->
+<line x1="20" y1="750" x2="880" y2="750" stroke="#D3D1C7" stroke-width="1"/>
+<text x="30" y="780" font-family="sans-serif" font-size="16" font-weight="600" fill="#26215C">Full tool &amp; language inventory</text>
+
+<g font-family="sans-serif" font-size="11.5" fill="#3D3D3A">
+<text x="30" y="810" font-weight="600" fill="#26215C">IaC</text>
+<text x="30" y="828">Terraform 1.15 · HCL</text>
+<text x="30" y="844">terraform test · fmt · validate</text>
+
+<text x="230" y="810" font-weight="600" fill="#26215C">GCP services</text>
+<text x="230" y="828">Resource Mgr · Org Policy · IAM</text>
+<text x="230" y="844">Compute · Cloud Run · GCS · BigQuery</text>
+<text x="230" y="860">Secret Mgr · Logging · Monitoring</text>
+<text x="230" y="876">SCC · Access Context Mgr · Billing</text>
+
+<text x="480" y="810" font-weight="600" fill="#26215C">CI/CD actions</text>
+<text x="480" y="828">google-github-actions/auth</text>
+<text x="480" y="844">setup-gcloud · setup-terraform</text>
+<text x="480" y="860">github-script · dynamic-badges-action</text>
+
+<text x="680" y="810" font-weight="600" fill="#26215C">Docs &amp; badges</text>
+<text x="680" y="828">terraform-docs v0.19.0</text>
+<text x="680" y="844">shields.io · GitHub Gist</text>
+<text x="680" y="860">4 Architecture Decision Records</text>
+
+<text x="30" y="905" font-weight="600" fill="#26215C">Languages</text>
+<text x="30" y="923">Python 3 · Bash · SQL · YAML · Markdown</text>
+
+<text x="330" y="905" font-weight="600" fill="#26215C">Security scanners</text>
+<text x="330" y="923">Checkov · Terrascan</text>
+
+<text x="560" y="905" font-weight="600" fill="#26215C">Cost tools</text>
+<text x="560" y="923">Infracost · bq CLI · Native billing export</text>
+</g>
+
+<line x1="20" y1="950" x2="880" y2="950" stroke="#D3D1C7" stroke-width="1"/>
+<text x="30" y="978" font-family="sans-serif" font-size="12" fill="#5F5E5A">9 Terraform stages · Daily drift detection · Gated CI/CD · WIF auth · Zero credential files</text>
+<text x="30" y="998" font-family="sans-serif" font-size="12" fill="#5F5E5A">Live badges: Infracost Estimate · GCP Billed Cost · Checkov Scan — all auto-updating</text>
+
+</svg>
