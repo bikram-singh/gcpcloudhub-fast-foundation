@@ -4,6 +4,7 @@
 
 ### GCP Organization Landing Zone · Terraform · FAST-Inspired Design · Full Security & Cost Governance
 
+[![GCP Billed Cost](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-billed-cost-badge.json)](https://console.cloud.google.com/billing)
 [![Monthly Cost](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-cost-badge.json)](https://dashboard.infracost.io/org/gcpcloudhub)
 [![Checkov](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bikram-singh/5e15a2c50f65a4436ed0b99c1e673ae7/raw/gcpcloudhub-checkov-badge.json)](https://www.checkov.io)
 
