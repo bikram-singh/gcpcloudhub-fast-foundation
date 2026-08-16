@@ -104,13 +104,16 @@ It isn't a tutorial repo or a copy of Google's own FAST reference — it's a wor
       (04-project-factory, attached as Shared VPC service projects)
                                 │
                                 ▼
+              08-vpc-sc: Access Context Manager perimeter
+                     (dry-run mode, protects everything below)
+                                │
+                                ▼
    06-workload-demo: live Cloud Run + hardened e2-micro VM
 
    Cross-cutting layers (apply across everything above):
    00-bootstrap        seed project, state bucket, WIF, automation SA
    05-security          audit log sink, Secret Manager, IAM alerting
    07-cost-visibility   BigQuery billing export, cost-by-department query
-   08-vpc-sc            Access Context Manager perimeter (dry-run mode)
 ```
 
 ### 🔄 Stage Dependency Chain
@@ -368,10 +371,10 @@ cd ../01-org-policies && terraform init && terraform apply
 cd ../02-resman && terraform init && terraform apply
 cd ../03-networking && terraform init && terraform apply
 cd ../04-project-factory && terraform init && terraform apply
+cd ../08-vpc-sc && terraform init && terraform apply
 cd ../05-security && terraform init && terraform apply
 cd ../06-workload-demo && terraform init && terraform apply
 cd ../07-cost-visibility && terraform init && terraform apply
-cd ../08-vpc-sc && terraform init && terraform apply
 ```
 
 ---
@@ -381,10 +384,10 @@ cd ../08-vpc-sc && terraform init && terraform apply
 Destroy in exact reverse order:
 
 ```bash
-cd 08-vpc-sc && terraform destroy
-cd ../07-cost-visibility && terraform destroy
+cd 07-cost-visibility && terraform destroy
 cd ../06-workload-demo && terraform destroy
 cd ../05-security && terraform destroy
+cd ../08-vpc-sc && terraform destroy
 cd ../04-project-factory && terraform destroy
 cd ../03-networking && terraform destroy
 cd ../02-resman && terraform destroy
