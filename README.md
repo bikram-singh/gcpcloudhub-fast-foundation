@@ -35,11 +35,6 @@ This project is scanned with [Checkov](https://www.checkov.io/) for IaC misconfi
 
 
 A hand-built GCP Organization landing zone, inspired by Google's Fabric FAST framework, using department + environment folder segmentation instead of a flat environment-only hierarchy.
-
-## Architecture
-
-A hand-built GCP Organization landing zone, inspired by Google's Fabric FAST framework, using department + environment folder segmentation instead of a flat environment-only hierarchy.
-
 gcpcloudhub.in (Organization)
 - 00-bootstrap: seed automation project, GCS state bucket, automation SA, Workload Identity Federation for GitHub Actions
 - 01-org-policies: org-wide guardrails - no default networks, no VM public IPs, no SA keys, no public buckets/SQL, domain-restricted IAM
@@ -119,13 +114,6 @@ Terraform can create the BigQuery dataset for billing export (07-cost-visibility
 Once daily billing data lands in `gch_billing_export` (starts the day after export was enabled), query actual spend by department/environment using `07-cost-visibility/queries/cost-by-department.sql` in BigQuery. This groups cost by the `department` label applied to every project in 04-project-factory, giving a real per-team cost breakdown rather than just a repo-wide total.
 
 Run it directly in the BigQuery Console, or via `bq query` CLI:
-
-## Using the billing export
-
-Once daily billing data lands in gch_billing_export (starts the day after export was enabled), query actual spend by department/environment using 07-cost-visibility/queries/cost-by-department.sql in BigQuery. This groups cost by the department label applied to every project in 04-project-factory, giving a real per-team cost breakdown rather than just a repo-wide total.
-
-Run it directly in the BigQuery Console, or via the bq query CLI:
-
 bq query --use_legacy_sql=false < 07-cost-visibility/queries/cost-by-department.sql
 
 ## Documentation generation
@@ -135,3 +123,24 @@ Each stage's README.md includes an auto-generated variable/output/resource table
 ## Testing
 
 Native Terraform tests (`terraform test`, requires Terraform 1.6+) validate key assertions for `01-org-policies` (policy configuration correctness) and `02-resman` (folder structure counts). Tests run automatically on every pull request via the plan workflow. Coverage is intentionally partial — a fuller test suite covering every stage is a natural next step, consciously scoped down here in favor of breadth across the rest of the landing zone (security, cost visibility, CI/CD) within reasonable project scope.
+
+## Teardown
+
+To tear down completely, destroy in reverse dependency order:
+
+cd 08-vpc-sc && terraform destroy
+cd ../07-cost-visibility && terraform destroy
+cd ../06-workload-demo && terraform destroy
+cd ../05-security && terraform destroy
+cd ../04-project-factory && terraform destroy
+cd ../03-networking && terraform destroy
+cd ../02-resman && terraform destroy
+cd ../01-org-policies && terraform destroy
+cd ../00-bootstrap && terraform destroy
+
+Notes:
+- 00-bootstrap's seed project has deletion_policy = "PREVENT" on the google_project resource, requiring it be changed to "DELETE" or deleted manually via gcloud before terraform destroy fully removes it.
+- The GCS state bucket is destroyed as part of 00-bootstrap's teardown, so run this stage last and expect to lose remote state history.
+- Org policies revert to Google defaults once destroyed; no manual cleanup needed.
+- The custom IAM role (gchDevopsScoped) enters a soft-delete state for approximately 7 days after destroy, per GCP's default retention for custom roles.
+- The VPC-SC access policy (08-vpc-sc) must be destroyed before 03-networking, since the perimeter references networking project numbers.
