@@ -26,15 +26,15 @@ jobs:
           - 06-workload-demo
           - 07-cost-visibility
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
 
       - name: Write terraform.tfvars
         working-directory: ${{ matrix.stage }}
@@ -141,7 +141,7 @@ jobs:
 
       - name: Report drift as issue
         if: steps.plan.outcome == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             github.rest.issues.create({

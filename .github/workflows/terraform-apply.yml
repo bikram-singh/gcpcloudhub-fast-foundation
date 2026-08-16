@@ -201,13 +201,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
           service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - name: Write terraform.tfvars
         working-directory: 06-workload-demo
         env:
@@ -227,7 +227,7 @@ jobs:
     needs: apply-workload-demo
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
@@ -240,7 +240,7 @@ jobs:
           COST=$(cat /tmp/infracost.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(f\"{float(d.get('totalMonthlyCost','0')):.2f}\")" 2>/dev/null || echo "0.00")
           echo "amount=$COST" >> "$GITHUB_OUTPUT"
       - name: Update cost badge gist
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 5e15a2c50f65a4436ed0b99c1e673ae7
@@ -253,7 +253,7 @@ jobs:
     needs: apply-workload-demo
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install and run Checkov
         run: |
           pip install checkov --break-system-packages --quiet
@@ -268,7 +268,7 @@ jobs:
           PASSED=$(python3 -c "import json; d=json.load(open('/tmp/checkov-out/results_json.json')); print(next((i['summary']['passed'] for i in d if i.get('check_type')=='terraform'), '?'))" 2>/dev/null || echo "?")
           echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
       - name: Update checkov badge gist
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 5e15a2c50f65a4436ed0b99c1e673ae7

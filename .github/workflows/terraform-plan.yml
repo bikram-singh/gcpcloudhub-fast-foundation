@@ -152,7 +152,7 @@ jobs:
   checkov-comment:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run Checkov
         id: checkov
         uses: bridgecrewio/checkov-action@master
@@ -164,7 +164,7 @@ jobs:
           output_format: cli
           output_file_path: console,/tmp/checkov-output.txt
       - name: Post Checkov comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
