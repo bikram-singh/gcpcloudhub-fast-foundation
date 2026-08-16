@@ -223,8 +223,64 @@ jobs:
       - working-directory: 06-workload-demo
         run: terraform init && terraform apply -auto-approve
 
-  update-cost-badge:
+  apply-cost-visibility:
     needs: apply-workload-demo
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v7
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: hashicorp/setup-terraform@v4
+      - name: Write terraform.tfvars
+        working-directory: 07-cost-visibility
+        env:
+          PREFIX: ${{ vars.GCP_PREFIX }}
+          REGION: ${{ vars.GCP_REGION }}
+          SEED_PROJECT_ID: ${{ vars.GCP_SEED_PROJECT_ID }}
+          BILLING_ACCOUNT_ID: ${{ secrets.GCP_BILLING_ACCOUNT_ID }}
+        run: |
+          cat > terraform.tfvars << TFEOF
+          prefix              = "$PREFIX"
+          region              = "$REGION"
+          seed_project_id     = "$SEED_PROJECT_ID"
+          billing_account_id  = "$BILLING_ACCOUNT_ID"
+          TFEOF
+      - working-directory: 07-cost-visibility
+        run: terraform init && terraform apply -auto-approve
+
+  apply-vpc-sc:
+    needs: apply-cost-visibility
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v7
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/97922325234/locations/global/workloadIdentityPools/gch-github-pool/providers/gch-github-provider
+          service_account: gch-automation@gch-seed-28bdf9.iam.gserviceaccount.com
+      - uses: hashicorp/setup-terraform@v4
+      - name: Write terraform.tfvars
+        working-directory: 08-vpc-sc
+        env:
+          ORG_ID: ${{ vars.GCP_ORG_ID }}
+          PREFIX: ${{ vars.GCP_PREFIX }}
+          STATE_BUCKET: ${{ vars.GCP_STATE_BUCKET }}
+        run: |
+          cat > terraform.tfvars << TFEOF
+          org_id       = "$ORG_ID"
+          prefix       = "$PREFIX"
+          state_bucket = "$STATE_BUCKET"
+          TFEOF
+      - working-directory: 08-vpc-sc
+        run: terraform init && terraform apply -auto-approve
+
+  update-cost-badge:
+    needs: apply-vpc-sc
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -250,7 +306,7 @@ jobs:
           color: green
 
   update-checkov-badge:
-    needs: apply-workload-demo
+    needs: apply-vpc-sc
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -278,7 +334,7 @@ jobs:
           color: green
 
   update-billed-cost-badge:
-    needs: apply-workload-demo
+    needs: apply-vpc-sc
     runs-on: ubuntu-latest
     steps:
       - id: auth
