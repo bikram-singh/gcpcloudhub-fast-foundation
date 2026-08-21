@@ -32,9 +32,9 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_departments"></a> [departments](#input\_departments) | List of department names, each gets Prod/NonProd sub-folders. | `list(string)` | <pre>[<br/>  "HR",<br/>  "Finance",<br/>  "IT",<br/>  "Sales",<br/>  "AI"<br/>]</pre> | no |
-| <a name="input_groups"></a> [groups](#input\_groups) | Admin group emails. | <pre>object({<br/>    org_admins       = string<br/>    billing_admins   = string<br/>    devops           = string<br/>    security_admins  = string<br/>  })</pre> | n/a | yes |
+| <a name="input_groups"></a> [groups](#input\_groups) | Admin group emails. | <pre>object({<br/>    org_admins      = string<br/>    billing_admins  = string<br/>    devops          = string<br/>    security_admins = string<br/>  })</pre> | n/a | yes |
 | <a name="input_org_id"></a> [org\_id](#input\_org\_id) | Numeric GCP organization ID. | `string` | n/a | yes |
+| <a name="input_departments"></a> [departments](#input\_departments) | List of department names, each gets Prod/NonProd sub-folders. | `list(string)` | <pre>[<br/>  "HR",<br/>  "Finance",<br/>  "IT",<br/>  "Sales",<br/>  "AI"<br/>]</pre> | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Short prefix used for all resource names. | `string` | `"gch"` | no |
 
 ## Outputs

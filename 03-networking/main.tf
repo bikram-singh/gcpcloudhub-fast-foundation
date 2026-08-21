@@ -28,11 +28,11 @@ resource "random_id" "suffix" {
 
 # Networking host project, placed under IT > Prod folder
 resource "google_project" "net_host" {
-  name            = "${var.prefix}-net-host"
-  project_id      = "${var.prefix}-net-host-${random_id.suffix.hex}"
-  org_id          = null
-  folder_id       = data.terraform_remote_state.resman.outputs.prod_folder_ids["IT"]
-  billing_account = var.billing_account_id
+  name                = "${var.prefix}-net-host"
+  project_id          = "${var.prefix}-net-host-${random_id.suffix.hex}"
+  org_id              = null
+  folder_id           = data.terraform_remote_state.resman.outputs.prod_folder_ids["IT"]
+  billing_account     = var.billing_account_id
   auto_create_network = false
 
   labels = {
@@ -133,7 +133,7 @@ resource "google_compute_firewall" "allow_iap_ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = ["35.235.240.0/20"]  # Google's IAP range
+  source_ranges = ["35.235.240.0/20"] # Google's IAP range
 }
 
 # Designate this project as a Shared VPC host project so other projects can attach as service projects

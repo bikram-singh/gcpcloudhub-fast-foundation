@@ -41,8 +41,8 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_billing_account_id"></a> [billing\_account\_id](#input\_billing\_account\_id) | Billing account ID (XXXXXX-XXXXXX-XXXXXX). | `string` | n/a | yes |
 | <a name="input_domain"></a> [domain](#input\_domain) | Organization primary domain. | `string` | n/a | yes |
-| <a name="input_github_repo"></a> [github\_repo](#input\_github\_repo) | GitHub repo allowed to impersonate the automation SA, format owner/repo. | `string` | `"bikram-singh/gcpcloudhub-fast-foundation"` | no |
 | <a name="input_org_id"></a> [org\_id](#input\_org\_id) | Numeric GCP organization ID. | `string` | n/a | yes |
+| <a name="input_github_repo"></a> [github\_repo](#input\_github\_repo) | GitHub repo allowed to impersonate the automation SA, format owner/repo. | `string` | `"bikram-singh/gcpcloudhub-fast-foundation"` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Short prefix used for all resource names. | `string` | `"gch"` | no |
 | <a name="input_region"></a> [region](#input\_region) | Default region for resources. | `string` | `"asia-south1"` | no |
 

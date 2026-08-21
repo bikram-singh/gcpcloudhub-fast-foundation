@@ -48,6 +48,8 @@ resource "google_project_service" "seed_apis" {
     "securitycenter.googleapis.com",
     "accesscontextmanager.googleapis.com",
     "monitoring.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "sqladmin.googleapis.com",
   ])
   project = google_project.seed.project_id
   service = each.value

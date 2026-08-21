@@ -3,7 +3,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.0"
+      version = "7.44.0"
     }
   }
   backend "gcs" {
@@ -115,4 +115,133 @@ resource "google_compute_instance" "demo_vm" {
     environment = "nonprod"
     managed-by  = "terraform"
   }
+}
+
+resource "google_project_service" "sqladmin_api" {
+  project = local.workload_project_id
+  service = "sqladmin.googleapis.com"
+}
+
+resource "google_project_service" "servicenetworking_workload_api" {
+  project = local.workload_project_id
+  service = "servicenetworking.googleapis.com"
+}
+
+resource "google_project_service" "servicenetworking_api" {
+  project = data.terraform_remote_state.networking.outputs.net_host_project_id
+  service = "servicenetworking.googleapis.com"
+}
+
+resource "google_compute_global_address" "psa_range" {
+  name          = "${var.prefix}-psa-range"
+  project       = data.terraform_remote_state.networking.outputs.net_host_project_id
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = data.terraform_remote_state.networking.outputs.vpc_self_link
+}
+
+resource "google_service_networking_connection" "psa_connection" {
+  network                 = data.terraform_remote_state.networking.outputs.vpc_self_link
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.psa_range.name]
+  depends_on              = [google_project_service.servicenetworking_api]
+}
+
+resource "random_password" "db_password" {
+  length  = 24
+  special = false
+}
+
+resource "google_sql_database_instance" "demo_postgres" {
+  name                = "${var.prefix}-hr-nonprod-pg"
+  project             = local.workload_project_id
+  region              = var.region
+  database_version    = "POSTGRES_17"
+  deletion_protection = false
+
+  settings {
+    edition           = "ENTERPRISE"
+    tier              = "db-f1-micro"
+    availability_type = "ZONAL"
+    disk_size         = 10
+    disk_type         = "PD_SSD"
+
+    ip_configuration {
+      ipv4_enabled    = false
+      private_network = data.terraform_remote_state.networking.outputs.vpc_self_link
+      ssl_mode        = "ENCRYPTED_ONLY"
+    }
+
+    backup_configuration {
+      enabled                        = true
+      point_in_time_recovery_enabled = true
+      transaction_log_retention_days = 7
+      backup_retention_settings {
+        retained_backups = 7
+      }
+    }
+
+    database_flags {
+      name  = "log_connections"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_disconnections"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_checkpoints"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_lock_waits"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_duration"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_hostname"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_statement"
+      value = "all"
+    }
+    database_flags {
+      name  = "cloudsql.enable_pgaudit"
+      value = "on"
+    }
+    database_flags {
+      name  = "pgaudit.log"
+      value = "all"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.psa_connection, google_project_service.sqladmin_api, google_project_service.servicenetworking_workload_api]
+}
+
+resource "google_sql_database" "demo_db" {
+  name     = "demo"
+  project  = local.workload_project_id
+  instance = google_sql_database_instance.demo_postgres.name
+}
+
+resource "google_sql_user" "demo_user" {
+  name     = "demo_app"
+  project  = local.workload_project_id
+  instance = google_sql_database_instance.demo_postgres.name
+  password = random_password.db_password.result
+}
+
+resource "google_secret_manager_secret_version" "db_credential" {
+  secret = "projects/gch-seed-28bdf9/secrets/gch-example-db-credential"
+  secret_data = jsonencode({
+    host     = google_sql_database_instance.demo_postgres.private_ip_address
+    database = google_sql_database.demo_db.name
+    username = google_sql_user.demo_user.name
+    password = random_password.db_password.result
+  })
 }
