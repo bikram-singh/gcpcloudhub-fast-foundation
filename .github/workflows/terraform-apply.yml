@@ -351,9 +351,11 @@ jobs:
           if [ "$ROWS" = "0" ]; then
             echo "amount=pending data" >> "$GITHUB_OUTPUT"
           else
-            TOTAL=$(bq query --use_legacy_sql=false --format=csv \
+            TOTAL_INR=$(bq query --use_legacy_sql=false --format=csv \
               "SELECT ROUND(SUM(cost), 2) FROM \`gch-seed-28bdf9.gch_billing_export.gcp_billing_export_resource_v1_012E9C_0D5AF1_5575CE\` WHERE usage_start_time >= TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MONTH)" | tail -1)
-            echo "amount=\$$TOTAL" >> "$GITHUB_OUTPUT"
+            RATE=$(curl -s "https://api.frankfurter.app/latest?from=INR&to=USD" | python3 -c "import json,sys; print(json.load(sys.stdin)['rates']['USD'])")
+            TOTAL_USD=$(python3 -c "print(round($TOTAL_INR * $RATE, 2))")
+            echo "amount=\$$TOTAL_USD" >> "$GITHUB_OUTPUT"
           fi
       - name: Update billed cost badge gist
         uses: schneegans/dynamic-badges-action@v1.9.0
