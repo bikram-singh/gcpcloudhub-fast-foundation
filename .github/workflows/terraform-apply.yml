@@ -353,11 +353,7 @@ jobs:
           else
             TOTAL_INR=$(bq query --use_legacy_sql=false --format=csv \
               "SELECT ROUND(SUM(cost), 2) FROM \`gch-seed-28bdf9.gch_billing_export.gcp_billing_export_resource_v1_012E9C_0D5AF1_5575CE\` WHERE usage_start_time >= TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MONTH)" | tail -1)
-            echo "--- Frankfurter API response ---"
-            curl -s "https://api.frankfurter.app/latest?from=INR&to=USD"
-            echo ""
-            echo "--- end response ---"
-            RATE=$(curl -s "https://api.frankfurter.app/latest?from=INR&to=USD" | python3 -c "import json,sys; print(json.load(sys.stdin).get('rates',{}).get('USD','0.012'))" 2>/dev/null || echo "0.012")
+            RATE=$(curl -sL "https://api.frankfurter.dev/v1/latest?from=INR&to=USD" | python3 -c "import json,sys; print(json.load(sys.stdin).get('rates',{}).get('USD','0.0105'))" 2>/dev/null || echo "0.0105")
             TOTAL_USD=$(python3 -c "print(round($TOTAL_INR * $RATE, 2))")
             echo "amount=\$$TOTAL_USD" >> "$GITHUB_OUTPUT"
           fi
