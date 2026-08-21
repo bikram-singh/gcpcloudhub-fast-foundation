@@ -419,3 +419,27 @@ Notes:
 *Built with Terraform · Google Cloud Platform · GitHub Actions · Checkov · Terrascan · Infracost*
 
 </div>
+
+## 📸 Snapshots
+
+**Domain & Identity**
+![Domain registrar](docs/snapshots/01-domain-registrar-gcpcloudhub-in.png)
+![Single admin account](docs/snapshots/02-single-admin-account.png)
+![Admin groups](docs/snapshots/03-admin-groups-list.png)
+
+**Organization Structure**
+![Org folder hierarchy](docs/snapshots/04-org--folder-hierarchy-console.png)
+![Org policies](docs/snapshots/05-org-policies.png)
+
+**Networking**
+![Shared VPC host project](docs/snapshots/06-shared-vpc-host-project.png)
+![Shared VPC service projects](docs/snapshots/07-shared-vpc-service-project.png)
+![Cloud NAT](docs/snapshots/09-cloud-nat.png)
+
+**Security**
+![Workload Identity Federation](docs/snapshots/08-wif.png)
+![VPC Service Controls](docs/snapshots/1-vpc-sc.png)
+
+**CI/CD & Cost**
+![Full pipeline](docs/snapshots/10-cicd.png)
+![Infracost breakdown](docs/snapshots/11-infracost.png)
