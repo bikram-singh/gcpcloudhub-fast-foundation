@@ -117,11 +117,14 @@ resource "google_compute_instance" "demo_vm" {
   }
 }
 
-# --- Cloud SQL PostgreSQL, private IP only (org policy blocks public IP) ---
-
 resource "google_project_service" "sqladmin_api" {
   project = local.workload_project_id
   service = "sqladmin.googleapis.com"
+}
+
+resource "google_project_service" "servicenetworking_workload_api" {
+  project = local.workload_project_id
+  service = "servicenetworking.googleapis.com"
 }
 
 resource "google_project_service" "servicenetworking_api" {
@@ -154,10 +157,11 @@ resource "google_sql_database_instance" "demo_postgres" {
   name                = "${var.prefix}-hr-nonprod-pg"
   project             = local.workload_project_id
   region              = var.region
-  database_version    = "POSTGRES_15"
+  database_version    = "POSTGRES_17"
   deletion_protection = false
 
   settings {
+    edition           = "ENTERPRISE"
     tier              = "db-f1-micro"
     availability_type = "ZONAL"
     disk_size         = 10
@@ -166,14 +170,57 @@ resource "google_sql_database_instance" "demo_postgres" {
     ip_configuration {
       ipv4_enabled    = false
       private_network = data.terraform_remote_state.networking.outputs.vpc_self_link
+      ssl_mode        = "ENCRYPTED_ONLY"
     }
 
     backup_configuration {
-      enabled = false
+      enabled                        = true
+      point_in_time_recovery_enabled = true
+      transaction_log_retention_days = 7
+      backup_retention_settings {
+        retained_backups = 7
+      }
+    }
+
+    database_flags {
+      name  = "log_connections"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_disconnections"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_checkpoints"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_lock_waits"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_duration"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_hostname"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_statement"
+      value = "all"
+    }
+    database_flags {
+      name  = "cloudsql.enable_pgaudit"
+      value = "on"
+    }
+    database_flags {
+      name  = "pgaudit.log"
+      value = "all"
     }
   }
 
-  depends_on = [google_service_networking_connection.psa_connection, google_project_service.sqladmin_api]
+  depends_on = [google_service_networking_connection.psa_connection, google_project_service.sqladmin_api, google_project_service.servicenetworking_workload_api]
 }
 
 resource "google_sql_database" "demo_db" {
@@ -190,7 +237,7 @@ resource "google_sql_user" "demo_user" {
 }
 
 resource "google_secret_manager_secret_version" "db_credential" {
-  secret      = "projects/gch-seed-28bdf9/secrets/gch-example-db-credential"
+  secret = "projects/gch-seed-28bdf9/secrets/gch-example-db-credential"
   secret_data = jsonencode({
     host     = google_sql_database_instance.demo_postgres.private_ip_address
     database = google_sql_database.demo_db.name

@@ -28,9 +28,9 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_billing_account_id"></a> [billing\_account\_id](#input\_billing\_account\_id) | n/a | `string` | n/a | yes |
+| <a name="input_seed_project_id"></a> [seed\_project\_id](#input\_seed\_project\_id) | n/a | `string` | n/a | yes |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"gch"` | no |
 | <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"asia-south1"` | no |
-| <a name="input_seed_project_id"></a> [seed\_project\_id](#input\_seed\_project\_id) | n/a | `string` | n/a | yes |
 
 ## Outputs
 

@@ -35,11 +35,11 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_billing_account_id"></a> [billing\_account\_id](#input\_billing\_account\_id) | n/a | `string` | n/a | yes |
-| <a name="input_departments"></a> [departments](#input\_departments) | n/a | `list(string)` | <pre>[<br/>  "HR",<br/>  "Finance",<br/>  "IT",<br/>  "Sales",<br/>  "AI"<br/>]</pre> | no |
 | <a name="input_enabled_workloads"></a> [enabled\_workloads](#input\_enabled\_workloads) | Explicit list of department/env pairs to actually provision, gated by billing quota. | <pre>list(object({<br/>    department = string<br/>    env        = string<br/>  }))</pre> | n/a | yes |
 | <a name="input_org_id"></a> [org\_id](#input\_org\_id) | n/a | `string` | n/a | yes |
-| <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"gch"` | no |
 | <a name="input_state_bucket"></a> [state\_bucket](#input\_state\_bucket) | n/a | `string` | n/a | yes |
+| <a name="input_departments"></a> [departments](#input\_departments) | n/a | `list(string)` | <pre>[<br/>  "HR",<br/>  "Finance",<br/>  "IT",<br/>  "Sales",<br/>  "AI"<br/>]</pre> | no |
+| <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"gch"` | no |
 
 ## Outputs
 

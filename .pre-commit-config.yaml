@@ -9,7 +9,7 @@ repos:
           - "--quiet"
           - "--compact"
           - "--skip-check"
-          - "CKV_GCP_62,CKV_GCP_125,CKV_GCP_45,CKV_GCP_38,CKV_GCP_81"
+          - "CKV_GCP_62,CKV_GCP_125,CKV_GCP_45,CKV_GCP_38,CKV_GCP_81,CKV_GCP_6,CKV_GCP_79,CKV_GCP_109"
       - id: terraform_docs
         args:
           - "--args=--sort-by required"

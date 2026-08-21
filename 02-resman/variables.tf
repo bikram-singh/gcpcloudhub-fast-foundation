@@ -18,9 +18,9 @@ variable "departments" {
 variable "groups" {
   description = "Admin group emails."
   type = object({
-    org_admins       = string
-    billing_admins   = string
-    devops           = string
-    security_admins  = string
+    org_admins      = string
+    billing_admins  = string
+    devops          = string
+    security_admins = string
   })
 }
