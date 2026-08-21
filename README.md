@@ -404,22 +404,6 @@ Notes:
 
 ---
 
-## 🔗 Repository
-
-| Repository | Purpose |
-|---|---|
-| [`gcpcloudhub-fast-foundation`](https://github.com/bikram-singh/gcpcloudhub-fast-foundation) | GCP Organization Landing Zone · Terraform · FAST-Inspired · Full Governance |
-
----
-
-<div align="center">
-
-**Maintained by Bikram Singh**
-
-*Built with Terraform · Google Cloud Platform · GitHub Actions · Checkov · Terrascan · Infracost*
-
-</div>
-
 ## 📸 Snapshots
 
 **Domain & Identity**
@@ -443,3 +427,19 @@ Notes:
 **CI/CD & Cost**
 ![Full pipeline](docs/snapshots/10-cicd.png)
 ![Infracost breakdown](docs/snapshots/11-infracost.png)
+## 🔗 Repository
+
+| Repository | Purpose |
+|---|---|
+| [`gcpcloudhub-fast-foundation`](https://github.com/bikram-singh/gcpcloudhub-fast-foundation) | GCP Organization Landing Zone · Terraform · FAST-Inspired · Full Governance |
+
+---
+
+<div align="center">
+
+**Maintained by Bikram Singh**
+
+*Built with Terraform · Google Cloud Platform · GitHub Actions · Checkov · Terrascan · Infracost*
+
+</div>
+
