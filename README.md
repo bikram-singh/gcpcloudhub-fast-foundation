@@ -173,7 +173,7 @@ Three live badges cover cost and security together, all auto-updating via CI:
 | Badge | Source | What It Shows |
 |---|---|---|
 | **Infracost Estimate** | Infracost, run against Terraform plans | Predicted monthly cost from code, before anything is deployed |
-| **GCP Billed Cost** | Native BigQuery billing export, queried live via `bq` in CI | Real, actual spend from Google's own billing data — currently shows "pending data..." until Google's first daily export batch completes (export enabled, table schema verified correct, just waiting on Google's timing, not a bug) |
+| **GCP Billed Cost** | Native BigQuery billing export, queried live via `bq` in CI | Real, actual spend from Google's own billing data — confirmed working: 2,221 rows exported, spanning Aug 14-20, correctly attributable by department (verified via a real cost-by-department query returning genuine per-service, per-project cost breakdowns) |
 | **Checkov Scan** | Checkov, run against all Terraform code | Current pass count across the whole repo |
 
 ### Predicted (before deployment) — Infracost
@@ -352,7 +352,7 @@ Full reasoning in [`docs/decisions/`](docs/decisions/):
 - **Billing export activation is a manual Console step** — GCP's Cloud Billing API has no Terraform resource for linking export to a dataset
 - **Infracost doesn't run on Dependabot's own PRs** — GitHub blocks repository secrets from Dependabot-triggered workflows by design
 - **VPC Service Controls runs in dry-run mode**, not enforced — a deliberate choice given live workloads were already running when the stage was added; documented path to enforcement included
-- **GCP Billed Cost badge shows "pending data..."** until Google's billing export completes its first daily batch — configuration independently verified correct, purely a timing dependency outside this project's control
+- ~~GCP Billed Cost badge shows "pending data..."~~ **Resolved** — real billing data confirmed flowing as of Aug 20 (2,221 rows). The cost-by-department query returns genuine results, proving the full predicted-vs-actual cost visibility pipeline works end to end
 - **This repository is unlicensed** (no LICENSE file) — a deliberate choice; by default this means all rights reserved, so the code is viewable but not formally licensed for reuse
 
 ---
