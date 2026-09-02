@@ -14,6 +14,8 @@
 [![Terrascan](https://img.shields.io/badge/Terrascan-0_violations-2ECC71?logo=checkmarx&logoColor=white)](https://runterrascan.io)
 [![WIF](https://img.shields.io/badge/Auth-Workload_Identity_Federation-FF6D00?logo=googlecloud&logoColor=white)](https://cloud.google.com/iam/docs/workload-identity-federation)
 
+![gcpcloudhub-fast-foundation thumbnail](docs/gcpcloudhub-fast-foundation-thumbnail.png)
+
 ---
 
 *A hand-built GCP Organization landing zone, inspired by Google Cloud's Fabric FAST framework, written from scratch in Terraform. Nine sequential stages take an empty GCP organization to a fully governed, multi-department platform — org-wide policy guardrails, department-segmented folder hierarchy, shared networking, a quota-aware project factory, centralized security and audit logging, live billed workloads, dual-direction cost visibility, and a VPC Service Controls perimeter — all deployed through a gated CI/CD pipeline authenticated with zero credential files.*
@@ -80,9 +82,7 @@ It isn't a tutorial repo or a copy of Google's own FAST reference — it's a wor
 
 ## 🏛️ Architecture
 
-![Landing zone architecture](docs/architecture.svg)
-
-![Complete architecture with full tech stack](docs/architecture-full.svg)
+![Complete architecture with full tech stack](docs/gcpcloudhub-fast-foundation_architecture.png)
 
 ```
                     Organization: gcpcloudhub.in
